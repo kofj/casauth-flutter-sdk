@@ -1,15 +1,14 @@
 class HttpResult {
-  late String message = "";
   late int code;
-  late Map data;
+  late String? status = "";
+  late String? message = "";
+  late Map<String, dynamic>? jsonBody;
 
-  HttpResult(String msg, {int? codev, Map? datamap}) {
-    message = msg;
-    if (codev != null) {
-      code = codev;
-    }
-    if (datamap != null) {
-      data = datamap;
-    }
+  HttpResult(int respCode,
+      {String? respStatus, String? respMessage, Map<String, dynamic>? body}) {
+    code = respCode;
+    status = respStatus;
+    message = respMessage;
+    jsonBody = body;
   }
 }

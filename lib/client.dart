@@ -8,14 +8,15 @@ import 'package:casauth/user.dart';
 
 class Client {
   static User? currentUser;
+  static String? token;
 
 // register a new user by username and password
   static Future<HttpResult> registerByUserName(
-    String email,
+    String username,
     String password,
   ) async {
     var payload = jsonEncode({
-      'username': email,
+      'username': username,
       'password': password,
       'appId': CASAuth.appId,
       'application': CASAuth.app,
@@ -25,6 +26,37 @@ class Client {
     HttpResult resp = await post('/api/signup', payload);
 
     return resp;
+  }
+
+  static Future<HttpResult> loginByUserName(
+    String username,
+    String password,
+  ) async {
+    var payload = jsonEncode({
+      'username': username,
+      'password': password,
+      'appId': CASAuth.appId,
+      'application': CASAuth.app,
+      'organization': CASAuth.organization,
+      'autoSignin': true,
+      'type': 'id_token',
+    });
+
+    HttpResult resp = await post('/api/login', payload);
+    token = resp.jsonBody?['data'];
+    currentUser = null;
+    if (resp.code == 200 && token != null && token!.isNotEmpty) {
+      await userInfo();
+    }
+    return resp;
+  }
+
+  static Future<void> userInfo() async {
+    HttpResult resp = await get('/api/get-account');
+    Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
+    if (resp.code == 200 && json.isNotEmpty) {
+      currentUser = User.fromJson(json);
+    }
   }
 
   static Future<HttpResult> get(String endpoint) async {
@@ -48,6 +80,10 @@ class Client {
       "content-type": "application/json"
     };
 
+    if (token != null) {
+      headers["Authorization"] = "Bearer $token";
+    }
+
     method = method.toLowerCase();
     http.Response? response;
     if (method == 'get') {
@@ -60,24 +96,24 @@ class Client {
     return parseResponse(response);
   }
 
-  static HttpResult parseResponse(http.Response? response) {
-    HttpResult result = HttpResult("error");
-    if (response == null) {
+  static HttpResult parseResponse(http.Response? resp) {
+    HttpResult result = HttpResult(
+      resp?.statusCode ?? 0,
+    );
+    if (resp == null) {
       return result;
     }
-    var body = response.body;
-    var code = response.statusCode;
+    var body = resp.body;
+    var code = resp.statusCode;
     if (code != 200) {
-      return HttpResult(
-        body,
-        codev: code,
-      );
+      result.message = body;
+      return result;
     }
     var data = jsonDecode(body);
-    return HttpResult(
-      "ok",
-      codev: code,
-      datamap: data,
-    );
+    result.jsonBody = data;
+    result.status = data['status'];
+    result.message = data['msg'];
+
+    return result;
   }
 }

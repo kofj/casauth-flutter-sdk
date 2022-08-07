@@ -41,6 +41,8 @@ services:
     entrypoint: /bin/sh -c 'sleep 6000'
     environment:
       CAS_SERVER: http://casdoor:8000
+      PUB_HOSTED_URL: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
+      FLUTTER_STORAGE_BASE_URL: "https://mirrors.tuna.tsinghua.edu.cn/flutter"
     volumes:
       - ../../:/workspace/
   # debug:

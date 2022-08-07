@@ -1,10 +1,4 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,7 +28,7 @@ void main() {
     expect(CASAuth.organization, orgnazationName);
   });
 
-  group("register", () {
+  group("register tests | ", () {
     Client();
     String username = "user_${getRandomString(5)}";
     String password = "hUQxzNTPw7IL";
@@ -43,21 +37,56 @@ void main() {
     test("Register with username and password", () async {
       HttpResult resp = await Client.registerByUserName(username, password);
       expect(resp.code, 200);
-      expect(resp.message, "ok");
-      expect(resp.data["status"], "ok");
-      expect(resp.data["data"], "$orgnazationName/$username");
+      expect(resp.status, "ok", reason: "raw resp: $resp");
+      expect(resp.jsonBody?["data"], "$orgnazationName/$username");
     });
 
     test("Username exists", () async {
       HttpResult resp = await Client.registerByUserName(username, password);
-      // print(jsonEncode(resp));
       expect(resp.code, 200);
-      expect(resp.message, "ok");
-      expect(resp.data["data"], null);
-      expect(resp.data["status"], "error");
-      expect(resp.data["msg"], "username already exists");
+      expect(resp.jsonBody?["data"], isNull);
+      expect(resp.message, "username already exists");
+      expect(resp.status, "error", reason: "raw resp: $resp");
     });
 
-    // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","autoSignin":true,"type":"id_token","phonePrefix":"86","samlRequest":""}' |http 'http://localhost:8000/api/login?clientId=dc4b4df2fcfa9d2ef765&scope=read,write'
+    // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","autoSignin":true,"type":"id_token","phonePrefix":"86","samlRequest":""}' |http 'http://localhost:8000/api/login'
+
+    test("Login with username and password", () async {
+      HttpResult resp = await Client.loginByUserName(username, password);
+      expect(resp.code, 200);
+      expect(Client.currentUser, isNotNull);
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(Client.currentUser?.id, isNotEmpty);
+      expect(Client.currentUser?.name, username);
+      expect(Client.currentUser?.avatar, isNotEmpty);
+      expect(Client.currentUser?.owner, orgnazationName);
+      expect(Client.currentUser?.signupApplication, appName);
+      expect(Client.currentUser?.score, 2000);
+      expect(Client.currentUser?.ranking, greaterThan(1));
+
+      expect(resp.status, "ok", reason: "raw resp: $resp");
+    });
+
+    test("Login with username and error password", () async {
+      HttpResult resp =
+          await Client.loginByUserName(username, "error_password");
+      expect(resp.code, 200);
+      expect(resp.jsonBody?["data"], isNull);
+      expect(resp.status, "error", reason: "raw resp: $resp");
+
+      expect(Client.currentUser, null,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+    });
+
+    test("Login with username that not exists", () async {
+      HttpResult resp =
+          await Client.loginByUserName("user_not_exists", "hUQxzNTPw7IL");
+      expect(resp.code, 200);
+      expect(resp.jsonBody?["data"], isNull);
+      expect(resp.status, "error", reason: "raw resp: $resp");
+
+      expect(Client.currentUser, null,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+    });
   });
 }

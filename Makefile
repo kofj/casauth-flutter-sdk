@@ -10,8 +10,8 @@ mycli:
 dumpsql:
 	@docker exec casdoor-mysql-1 sh -c 'exec mysqldump -uroot -p"JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK" casdoor > /docker-entrypoint-initdb.d/casdoor.sql'
 
-casdoor_isup:
+casdoor-isup:
 	@sh ./hack/casdoor/isup.sh
 
-ut: casdoor_isup
+unit-test: casdoor-isup
 	@docker exec -it casdoor-flutter-1 bash -c 'flutter pub get && flutter test --dart-define=CAS_SERVER=http://casdoor:8000'
