@@ -34,6 +34,15 @@ services:
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
     
+  flutter:
+    restart: always
+    working_dir: /workspace/
+    image:  cirrusci/flutter:3.0.4
+    entrypoint: /bin/sh -c 'sleep 6000'
+    environment:
+      CAS_SERVER: http://casdoor:8000
+    volumes:
+      - ../../:/workspace/
   # debug:
   #   image: jdecool/mycli
   #   entrypoint: /bin/sh -c 'sleep 99999'

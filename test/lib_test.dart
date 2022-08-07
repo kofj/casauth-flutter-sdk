@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:casauth/casauth.dart';
@@ -18,10 +19,12 @@ void main() {
   const String appId =
       String.fromEnvironment("CAS_APPID", defaultValue: "dc4b4df2fcfa9d2ef765");
   const String server = String.fromEnvironment("CAS_SERVER",
-      defaultValue: "http://localhost:8080");
+      defaultValue: "http://localhost:8000");
   const String orgnazationName =
       String.fromEnvironment("CAS_ORG_NAME", defaultValue: "dev");
 
+  debugPrint(
+      "---=== TEST ===---\nCAS_SERVER: $server\nCAS_APPNAME: $appName\nCAS_APPID: $appId\n---=== TEST ===---\n");
   CASAuth(appName, appId, server, orgnazationName);
 
   test("Check CASAuth Instance", () {
