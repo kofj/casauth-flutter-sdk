@@ -3,6 +3,7 @@ services:
   casdoor:
     restart: always
     image: casbin/casdoor:v1.79.0
+    container_name: casdoor-server
     entrypoint: /bin/sh -c 'sleep 30 && ./server --createDatabase=true'
     ports:
       - "8000:8000"
@@ -21,6 +22,7 @@ services:
     restart: always
     image: mysql:8.0.25
     platform: linux/amd64
+    container_name: casdoor-mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", -p"JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK"]
       interval: 10s
@@ -38,6 +40,7 @@ services:
     restart: always
     working_dir: /workspace/
     image:  cirrusci/flutter:3.0.4
+    container_name: casdoor-flutter
     entrypoint: /bin/sh -c 'sleep 6000'
     environment:
       CAS_SERVER: http://casdoor:8000
