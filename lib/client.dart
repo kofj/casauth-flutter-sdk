@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:casauth/utils.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:casauth/casauth.dart';
@@ -51,6 +52,27 @@ class Client {
     return resp;
   }
 
+// sendCode sends a verification code to the user's phone or email
+  static Future<HttpResult> sendCode(
+    String dest, {
+    AccountType? type = AccountType.phone,
+    String? checkId = "",
+    String? checkKey = "",
+    String? checkType = "none",
+    String? checkUser = "",
+  }) async {
+    if (type != AccountType.phone && type != AccountType.email) {
+      return HttpResult(400,
+          respStatus: "error", respMessage: "invalid account type: $type");
+    }
+    String body =
+        "applicationId=admin/${CASAuth.app}&checkType=$checkType&checkId=$checkId&checkKey=$checkKey&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
+    Map<String, String> extHeader = {
+      "content-type": "application/x-www-form-urlencoded"
+    };
+    return await post("/api/send-verification-code", body, extHeader);
+  }
+
   static Future<void> userInfo() async {
     HttpResult resp = await get('/api/get-account');
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
@@ -59,27 +81,33 @@ class Client {
     }
   }
 
-  static Future<HttpResult> get(String endpoint) async {
+  static Future<HttpResult> get(String endpoint,
+      {Map<String, String>? extHeaders}) async {
     String url = CASAuth.server + endpoint;
 
-    return request("get", url, null);
+    return request("get", url, null, extHeaders);
   }
 
-  static Future<HttpResult> post(String endpoint, [String? body]) async {
+  static Future<HttpResult> post(String endpoint,
+      [String? body, Map<String, String>? extHeaders]) async {
     String url = CASAuth.server + endpoint;
-    return request("post", url, body);
+    return request("post", url, body, extHeaders);
   }
 
   static Future<HttpResult> request(String method, String uri,
-      [String? body]) async {
+      [String? body, Map<String, String>? extHeaders]) async {
     var url = Uri.parse(uri);
     Map<String, String> headers = {
       "x-app-id": CASAuth.appId,
       "x-request-from": "casauth-sdk-flutter",
       "x-casauth-sdk-version": CASAuth.version,
-      "content-type": "application/json"
     };
-
+    if (extHeaders != null) {
+      headers.addAll(extHeaders);
+    }
+    if (headers["content-type"] == null || headers["content-type"] == "") {
+      headers["content-type"] = "application/json";
+    }
     if (token != null) {
       headers["Authorization"] = "Bearer $token";
     }

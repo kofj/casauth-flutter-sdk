@@ -28,11 +28,46 @@ void main() {
     expect(CASAuth.organization, orgnazationName);
   });
 
+  group("send verfiy code | ", () {
+    test("invalid account type", () async {
+      HttpResult resp =
+          await Client.sendCode("dest", type: AccountType.username);
+      expect(resp.code, 400);
+    });
+
+    test("phone", () async {
+      HttpResult resp =
+          await Client.sendCode("18888888888", type: AccountType.phone);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      // expect(resp.status, "ok",
+      //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    });
+
+    test("email", () async {
+      HttpResult resp =
+          await Client.sendCode("me@example.com", type: AccountType.email);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    });
+
+    test("email limit", () async {
+      HttpResult resp =
+          await Client.sendCode("me@example.com", type: AccountType.email);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "error",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.message, "You can only send one code in 60s.",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    });
+  });
+
   group("register tests | ", () {
-    Client();
     String username = "user_${getRandomString(5)}";
     String password = "hUQxzNTPw7IL";
-
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","agreement":true, "appId": "dc4b4df2fcfa9d2ef765"}' | http POST 'http://localhost:8000/api/signup'
     test("Register with username and password", () async {
       HttpResult resp = await Client.registerByUserName(username, password);

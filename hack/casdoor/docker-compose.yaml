@@ -3,15 +3,17 @@ services:
   casdoor:
     restart: always
     image: casbin/casdoor:v1.79.0
-    container_name: casdoor-server
+    container_name: casdoor.server
     entrypoint: /bin/sh -c 'sleep 30 && ./server --createDatabase=true'
     ports:
-      - "8000:8000"
+      - "0.0.0.0:8000:8000"
+      - "0.0.0.0:8025:8025"
+      - "0.0.0.0:1025:1025"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 2s
+      interval: 1s
       timeout: 1s
-      retries: 25
+      retries: 30
     depends_on:
       - mysql
     environment:
@@ -22,12 +24,12 @@ services:
     restart: always
     image: mysql:8.0.25
     platform: linux/amd64
-    container_name: casdoor-mysql
+    container_name: casdoor.mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", -p"JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      interval: 1s
+      timeout: 1s
+      retries: 30
     ports:
       - "3306:3306"
     environment:
@@ -40,7 +42,7 @@ services:
     restart: always
     working_dir: /workspace/
     image:  cirrusci/flutter:3.0.4
-    container_name: casdoor-flutter
+    container_name: casdoor.flutter
     entrypoint: /bin/sh -c 'sleep 6000'
     environment:
       CAS_SERVER: http://casdoor:8000
@@ -48,6 +50,14 @@ services:
       FLUTTER_STORAGE_BASE_URL: "https://mirrors.tuna.tsinghua.edu.cn/flutter"
     volumes:
       - ../../:/workspace/
+  smtp:
+    restart: always
+    container_name: casdoor.smtp
+    image: mailhog/mailhog
+    network_mode: "service:casdoor"
+    depends_on:
+      - mysql
+      - casdoor
   # debug:
   #   image: jdecool/mycli
   #   entrypoint: /bin/sh -c 'sleep 99999'
