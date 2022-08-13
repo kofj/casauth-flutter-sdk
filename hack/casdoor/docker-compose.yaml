@@ -41,9 +41,13 @@ services:
   flutter:
     restart: always
     working_dir: /workspace/
+    network_mode: "service:mysql"
     image:  cirrusci/flutter:3.0.4
     container_name: casdoor.flutter
     entrypoint: /bin/sh -c 'sleep 6000'
+    depends_on:
+      - mysql
+      - casdoor
     environment:
       CAS_SERVER: http://casdoor:8000
       PUB_HOSTED_URL: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
@@ -52,8 +56,8 @@ services:
       - ../../:/workspace/
   smtp:
     restart: always
-    container_name: casdoor.smtp
     image: mailhog/mailhog
+    container_name: casdoor.smtp
     network_mode: "service:casdoor"
     depends_on:
       - mysql
