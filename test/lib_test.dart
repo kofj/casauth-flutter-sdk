@@ -49,8 +49,19 @@ void main() {
           await Client.sendCode("me@example.com", type: AccountType.email);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      // expect(resp.status, "ok",
-      //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    });
+
+    test("email limit", () async {
+      HttpResult resp =
+          await Client.sendCode("me@example.com", type: AccountType.email);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "error",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.message, "You can only send one code in 60s.",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
     });
   });
 
