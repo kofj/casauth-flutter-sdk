@@ -52,6 +52,12 @@ class Client {
     return resp;
   }
 
+  static Future<CaptchaResult> getCaptcha() async {
+    HttpResult resp = await get(
+        '/api/get-captcha?applicationId=admin/app-built-in&isCurrentProvider=false');
+    return CaptchaResult(resp);
+  }
+
 // sendCode sends a verification code to the user's phone or email
   static Future<HttpResult> sendCode(
     String dest, {

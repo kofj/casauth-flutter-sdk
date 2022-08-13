@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:casauth/utils.dart';
 import 'package:casauth/result.dart';
 
-void main() {
+void main() async {
   const String appName =
       String.fromEnvironment("CAS_APPNAME", defaultValue: "testapp");
   const String appId =
@@ -26,6 +27,91 @@ void main() {
     expect(CASAuth.appId, appId);
     expect(CASAuth.server, server);
     expect(CASAuth.organization, orgnazationName);
+  });
+
+  const int dbPort = 3306;
+  const String dbHost = "127.0.0.1";
+  const String dbUser = "root";
+  const String dbName = "casdoor";
+  const String dbPassword = "JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK";
+  // debugPrint("mysql://$dbUser:$dbPassword@$dbHost:$dbPort/$dbName\n");
+
+  MySQLConnection? db;
+
+  setUp(() async {
+    db = await MySQLConnection.createConnection(
+      host: dbHost,
+      port: dbPort,
+      userName: dbUser,
+      password: dbPassword,
+      databaseName: dbName,
+    );
+    if (db!.connected) {
+      return;
+    }
+    await db!.connect(timeoutMs: 1000);
+  });
+
+  tearDown(() async {
+    await db!.close();
+  });
+
+  test('ping database', () async {
+    expect(db!.connected, isTrue);
+    IResultSet ping = await db!.execute("SELECT 1 as value");
+    expect(ping.affectedRows, BigInt.zero);
+    expect(ping.numOfRows, 1);
+    expect(ping.rows.length, 1);
+    expect(ping.rows.first.colByName("value"), "1");
+  });
+
+  group("tests captcha | ", () {
+    test("default type", () async {
+      IResultSet rs = await db!.execute(
+        "update provider set type=:type where name=:name",
+        {
+          "type": "Default",
+          "name": "provider_captcha_default",
+        },
+      );
+
+      expect(rs.affectedRows, BigInt.one);
+
+      CaptchaResult resp = await Client.getCaptcha();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(resp.message, isEmpty);
+      expect(resp.captcha, isNotNull);
+      expect(resp.captcha?.type, "Default");
+      expect(resp.captcha?.captchaId, isNotEmpty);
+      expect(resp.captcha?.captchaImage, isNotEmpty);
+      // is png image
+      expect(
+        resp.captcha?.captchaImage?.contains("iVBORw0KGgoAAAANSUhEUgAAAMgAAA"),
+        isTrue,
+      );
+    });
+
+    test("none captcha", () async {
+      IResultSet rs = await db!.execute(
+        "update provider set type=:type where name=:name",
+        {
+          "type": "",
+          "name": "provider_captcha_default",
+        },
+      );
+
+      expect(rs.affectedRows, BigInt.one);
+
+      CaptchaResult resp = await Client.getCaptcha();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(resp.message, isEmpty);
+      expect(resp.captcha, isNotNull);
+      expect(resp.captcha?.type, "none");
+      expect(resp.captcha?.captchaId, isEmpty);
+      expect(resp.captcha?.captchaImage, isNull);
+    });
   });
 
   group("send verfiy code | ", () {
