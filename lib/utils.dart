@@ -1,3 +1,5 @@
+library casauth;
+
 import "dart:math";
 
 const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
