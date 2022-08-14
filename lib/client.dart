@@ -1,3 +1,5 @@
+library casauth;
+
 import 'dart:convert';
 
 import 'package:casauth/utils.dart';
@@ -16,6 +18,10 @@ class Client {
     String username,
     String password,
   ) async {
+    if (CASAuth.config.requiredSignupItem("Email") ||
+        CASAuth.config.requiredSignupItem("Phone")) {
+      throw ("Email and/or Phone is required, cannot signup with username only");
+    }
     var payload = jsonEncode({
       'username': username,
       'password': password,
@@ -40,7 +46,7 @@ class Client {
       'application': CASAuth.app,
       'organization': CASAuth.organization,
       'autoSignin': true,
-      'type': 'id_token',
+      'type': CASAuth.config.getGrantTokenType(),
     });
 
     HttpResult resp = await post('/api/login', payload);

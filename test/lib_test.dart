@@ -22,6 +22,14 @@ void main() async {
       "---=== TEST ===---\nCAS_SERVER: $server\nCAS_APPNAME: $appName\nCAS_APPID: $appId\n---=== TEST ===---\n");
   CASAuth(appName, appId, server, orgnazationName);
 
+  test('test config', () async {
+    var cfg = CASAuth.config;
+    expect(cfg.name, appName);
+    expect(cfg.owner, "admin");
+    expect(cfg.clientId, appId);
+    expect(cfg.organization, orgnazationName);
+  });
+
   test("Check CASAuth Instance", () {
     expect(CASAuth.app, appName);
     expect(CASAuth.appId, appId);
@@ -75,7 +83,7 @@ void main() async {
         },
       );
 
-      expect(rs.affectedRows, BigInt.one);
+      expect(rs.affectedRows.toInt(), greaterThan(-1));
 
       CaptchaResult resp = await Client.getCaptcha();
       expect(resp.code, 200);
@@ -158,7 +166,8 @@ void main() async {
     test("Register with username and password", () async {
       HttpResult resp = await Client.registerByUserName(username, password);
       expect(resp.code, 200);
-      expect(resp.status, "ok", reason: "raw resp: $resp");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.jsonBody?["data"], "$orgnazationName/$username");
     });
 
@@ -166,8 +175,9 @@ void main() async {
       HttpResult resp = await Client.registerByUserName(username, password);
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
+      expect(resp.status, "error",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.message, "username already exists");
-      expect(resp.status, "error", reason: "raw resp: $resp");
     });
 
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","autoSignin":true,"type":"id_token","phonePrefix":"86","samlRequest":""}' |http 'http://localhost:8000/api/login'
@@ -193,7 +203,8 @@ void main() async {
           await Client.loginByUserName(username, "error_password");
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
-      expect(resp.status, "error", reason: "raw resp: $resp");
+      expect(resp.status, "error",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       expect(Client.currentUser, null,
           reason: "currentUser: ${jsonEncode(Client.currentUser)}");
@@ -204,7 +215,8 @@ void main() async {
           await Client.loginByUserName("user_not_exists", "hUQxzNTPw7IL");
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
-      expect(resp.status, "error", reason: "raw resp: $resp");
+      expect(resp.status, "error",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       expect(Client.currentUser, null,
           reason: "currentUser: ${jsonEncode(Client.currentUser)}");

@@ -1,3 +1,5 @@
+library casauth;
+
 class HttpResult {
   late int code;
   late String? status = "";
