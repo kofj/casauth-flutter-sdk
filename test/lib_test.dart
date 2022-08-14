@@ -129,14 +129,14 @@ void main() async {
       expect(resp.code, 400);
     });
 
-    test("phone", () async {
-      HttpResult resp =
-          await Client.sendCode("18888888888", type: AccountType.phone);
-      expect(resp.code, 200,
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      // expect(resp.status, "ok",
-      //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-    });
+    // test("phone", () async {
+    //   HttpResult resp =
+    //       await Client.sendCode("18888888888", type: AccountType.phone);
+    //   expect(resp.code, 200,
+    //       reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    //   // expect(resp.status, "ok",
+    //   //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+    // });
 
     test("email", () async {
       HttpResult resp =
@@ -220,6 +220,35 @@ void main() async {
 
       expect(Client.currentUser, null,
           reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+    });
+  });
+
+  group("register by phone | ", () {
+    String phone = "18888888880";
+    String password = "hUQxzNTPw7IL";
+    String username = "user_${getRandomString(5)}";
+
+    test("Register with phone and password", () async {
+      HttpResult resp = await Client.sendCode(phone, type: AccountType.phone);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      // expect(resp.status, "ok",
+      //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$phone' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      HttpResult resp2 = await Client.registerByPhone(phone, code,
+          password: password, username: username);
+      expect(resp2.code, 200);
+      expect(resp2.status, "ok",
+          reason: "resp: ${resp2.code}/${resp2.status}/${resp2.message}");
+      expect(resp2.jsonBody?["data"], "$orgnazationName/$username");
     });
   });
 }
