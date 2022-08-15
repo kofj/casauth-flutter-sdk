@@ -13,13 +13,18 @@ class CASAuth {
   static String publicKey = "";
   static String organization = "";
   static Config config = configFromJson("{}");
+  static String randomUsernamePrefix = "mobile_";
 
   CASAuth(String appName, String applicationId, String serverAddress,
-      String orgName) {
+      String orgName,
+      {String? userPrefix}) {
     app = appName;
     appId = applicationId;
     server = serverAddress;
     organization = orgName;
+    if (userPrefix != null) {
+      randomUsernamePrefix = userPrefix;
+    }
     init();
   }
 

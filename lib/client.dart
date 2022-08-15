@@ -22,6 +22,9 @@ class Client {
         CASAuth.config.requiredSignupItem("Phone")) {
       throw ("Email and/or Phone is required, cannot signup with username only");
     }
+    if (!CASAuth.config.hasSignupItem("Username")) {
+      throw ("Username is exists, cannot signup with username");
+    }
     var payload = jsonEncode({
       'username': username,
       'password': password,
@@ -55,6 +58,43 @@ class Client {
     if (resp.code == 200 && token != null && token!.isNotEmpty) {
       await userInfo();
     }
+    return resp;
+  }
+
+// will generate username and password if not provided and required
+  static Future<HttpResult> registerByPhone(
+    String phone,
+    String code, {
+    String? username,
+    String? password,
+    String countryCode = "86",
+  }) async {
+    if ((username == null || username.isEmpty) &&
+        CASAuth.config.requiredSignupItem("Username")) {
+      username = "${CASAuth.randomUsernamePrefix}${getRandomString(5)}";
+    }
+
+    if ((password == null || password.isEmpty) &&
+        CASAuth.config.requiredSignupItem("Password")) {
+      password = getRandomString(12);
+    }
+
+    if (countryCode.isEmpty) {
+      countryCode = "86";
+    }
+
+    var payload = jsonEncode({
+      'phone': phone,
+      'phoneCode': code,
+      'phonePrefix': countryCode,
+      'username': username,
+      'password': password,
+      'appId': CASAuth.appId,
+      'application': CASAuth.app,
+      'organization': CASAuth.organization,
+    });
+    HttpResult resp = await post('/api/signup', payload);
+
     return resp;
   }
 
