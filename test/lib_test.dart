@@ -22,6 +22,8 @@ void main() async {
       "---=== TEST ===---\nCAS_SERVER: $server\nCAS_APPNAME: $appName\nCAS_APPID: $appId\n---=== TEST ===---\n");
   CASAuth(appName, appId, server, orgnazationName);
 
+  String password = "hUQxzNTPw7IL"; // user password for all test cases
+
   test('test config', () async {
     var cfg = CASAuth.config;
     expect(cfg.name, appName);
@@ -59,6 +61,12 @@ void main() async {
     }
     await db!.connect(timeoutMs: 1000);
   });
+
+  cleanVerificationRecordAddr() async {
+    await db!.execute(
+      "update verification_record set remote_addr=''",
+    );
+  }
 
   tearDown(() async {
     await db!.close();
@@ -129,14 +137,16 @@ void main() async {
       expect(resp.code, 400);
     });
 
-    // test("phone", () async {
-    //   HttpResult resp =
-    //       await Client.sendCode("18888888888", type: AccountType.phone);
-    //   expect(resp.code, 200,
-    //       reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-    //   // expect(resp.status, "ok",
-    //   //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-    // });
+    test("phone", () async {
+      HttpResult resp =
+          await Client.sendCode("18888888888", type: AccountType.phone);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      await cleanVerificationRecordAddr();
+    });
 
     test("email", () async {
       HttpResult resp =
@@ -154,14 +164,15 @@ void main() async {
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      expect(resp.message, "You can only send one code in 60s.",
+      expect(resp.message, "you can only send one code in 60s",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      await cleanVerificationRecordAddr();
     });
   });
 
   group("register tests | ", () {
     String username = "user_${getRandomString(5)}";
-    String password = "hUQxzNTPw7IL";
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","agreement":true, "appId": "dc4b4df2fcfa9d2ef765"}' | http POST 'http://localhost:8000/api/signup'
     test("Register with username and password", () async {
       HttpResult resp = await Client.registerByUserName(username, password);
@@ -224,9 +235,10 @@ void main() async {
   });
 
   group("register by phone | ", () {
-    String phone = "18888888880";
-    String password = "hUQxzNTPw7IL";
+    String phone = "188010${randomNumberString(5)}";
     String username = "user_${getRandomString(5)}";
+
+    debugPrint("--== phone: $phone ==--\n");
 
     test("Register with phone and password", () async {
       HttpResult resp = await Client.sendCode(phone, type: AccountType.phone);
@@ -249,6 +261,62 @@ void main() async {
       expect(resp2.status, "ok",
           reason: "resp: ${resp2.code}/${resp2.status}/${resp2.message}");
       expect(resp2.jsonBody?["data"], "$orgnazationName/$username");
+
+      await cleanVerificationRecordAddr();
+    });
+
+    test("Login with phone and password", () async {
+      HttpResult resp = await Client.loginByUserName(phone, password);
+
+      debugPrint("--== logined ==--\n${jsonEncode(Client.currentUser)}\n\n");
+      expect(resp.code, 200);
+      expect(Client.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(Client.currentUser?.phone, phone);
+      expect(Client.currentUser?.id, isNotEmpty);
+      expect(Client.currentUser?.avatar, isNotEmpty);
+      expect(Client.currentUser?.owner, orgnazationName);
+      expect(Client.currentUser?.signupApplication, appName);
+      expect(Client.currentUser?.score, 2000);
+      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      await cleanVerificationRecordAddr();
+    });
+
+    test("Login with phone code", () async {
+      HttpResult codeResp =
+          await Client.sendCode(phone, type: AccountType.phone);
+      expect(codeResp.code, 200,
+          reason:
+              "codeResp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$phone' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      HttpResult resp = await Client.loginByCode(phone, code);
+      expect(resp.code, 200);
+      expect(Client.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(Client.currentUser?.phone, phone);
+      expect(Client.currentUser?.id, isNotEmpty);
+      expect(Client.currentUser?.avatar, isNotEmpty);
+      expect(Client.currentUser?.owner, orgnazationName);
+      expect(Client.currentUser?.signupApplication, appName);
+      expect(Client.currentUser?.score, 2000);
+      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      // clean
+      await cleanVerificationRecordAddr();
     });
   });
 }
