@@ -99,6 +99,13 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "1.0.5"
+  email_validator:
+    dependency: "direct main"
+    description:
+      name: email_validator
+      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
+    source: hosted
+    version: "2.1.17"
   fake_async:
     dependency: transitive
     description:

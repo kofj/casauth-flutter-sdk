@@ -2,9 +2,10 @@ library casauth;
 
 import 'dart:convert';
 
-import 'package:casauth/utils.dart';
 import 'package:http/http.dart' as http;
+import 'package:email_validator/email_validator.dart';
 
+import 'package:casauth/utils.dart';
 import 'package:casauth/casauth.dart';
 import 'package:casauth/result.dart';
 import 'package:casauth/user.dart';
@@ -40,15 +41,16 @@ class Client {
 
   static Future<HttpResult> loginByUserName(
     String username,
-    String password,
-  ) async {
+    String password, {
+    bool autoSignin = true,
+  }) async {
     var payload = jsonEncode({
       'username': username,
       'password': password,
       'appId': CASAuth.appId,
+      'autoSignin': autoSignin,
       'application': CASAuth.app,
       'organization': CASAuth.organization,
-      'autoSignin': true,
       'type': CASAuth.config.getGrantTokenType(),
     });
 
@@ -95,6 +97,41 @@ class Client {
     });
     HttpResult resp = await post('/api/signup', payload);
 
+    return resp;
+  }
+
+  static Future<HttpResult> loginByCode(
+    String phoneOrEmail,
+    String code, {
+    String type = "phone",
+    bool autoSignin = true,
+    String countryCode = "86",
+  }) async {
+    if (type == "phone" && !isCnPhoneNumber(phoneOrEmail)) {
+      throw ("Phone number is not allowed");
+    }
+
+    if (type == "email" && !EmailValidator.validate(phoneOrEmail)) {
+      throw ("Email is not valid");
+    }
+
+    var payload = jsonEncode({
+      'code': code,
+      'appId': CASAuth.appId,
+      'username': phoneOrEmail,
+      'autoSignin': autoSignin,
+      'phonePrefix': countryCode,
+      'application': CASAuth.app,
+      'organization': CASAuth.organization,
+      'type': CASAuth.config.getGrantTokenType(),
+    });
+
+    HttpResult resp = await post('/api/login', payload);
+    token = resp.jsonBody?['data'];
+    currentUser = null;
+    if (resp.code == 200 && token != null && token!.isNotEmpty) {
+      await userInfo();
+    }
     return resp;
   }
 

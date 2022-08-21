@@ -441,7 +441,7 @@ CREATE TABLE `provider` (
 
 LOCK TABLES `provider` WRITE;
 /*!40000 ALTER TABLE `provider` DISABLE KEYS */;
-INSERT INTO `provider` VALUES ('admin','mockmail','2022-08-13T12:26:59+08:00','模拟邮件','Email','Default','','Normal','test@mailhog.example','','','','','','','','','','localhost',1025,'Code','verification code: %s, please enter in 5 minutes.','','','','','','','','','','','',0,''),('admin','provider_captcha_default','2022-08-07T15:24:15Z','Captcha Default','Captcha','','','','','','','','','','','','','','',0,'','','','','','','','','','','','','',0,''),('admin','mocksms','2022-08-10T18:25:17+08:00','模拟短信','SMS','Aliyun SMS','','Normal','ak','sk','','','','','','','','','',0,'','','','sign','124','abc','','','','','','','',0,'https://github.com/organizations/xxx/settings/applications/1234567');
+INSERT INTO `provider` VALUES ('admin','mockmail','2022-08-13T12:26:59+08:00','模拟邮件','Email','Default','','Normal','test@mailhog.example','','','','','','','','','','localhost',1025,'Code','verification code: %s, please enter in 5 minutes.','','','','','','','','','','','',0,''),('admin','provider_captcha_default','2022-08-07T15:24:15Z','Captcha Default','Captcha','','','','','','','','','','','','','','',0,'','','','','','','','','','','','','',0,''),('admin','mocksms','2022-08-10T18:25:17+08:00','模拟短信','SMS','Mock SMS','','Normal','ak','sk','','','','','','','','','',0,'','','','sign','124','abc','','','','','','','',0,'https://github.com/organizations/xxx/settings/applications/1234567');
 /*!40000 ALTER TABLE `provider` ENABLE KEYS */;
 UNLOCK TABLES;
 
