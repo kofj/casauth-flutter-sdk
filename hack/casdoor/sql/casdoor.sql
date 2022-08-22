@@ -349,7 +349,7 @@ CREATE TABLE `permission_rule` (
 
 LOCK TABLES `permission_rule` WRITE;
 /*!40000 ALTER TABLE `permission_rule` DISABLE KEYS */;
-INSERT INTO `permission_rule` VALUES ('p','built-in/permission-built-in','built-in/admin','app-built-in','read','',''),('p','built-in/permission-built-in','built-in/admin','app-built-in','write','',''),('p','built-in/permission-built-in','built-in/admin','app-built-in','admin','','');
+INSERT INTO `permission_rule` VALUES ('p','built-in/admin','app-built-in','read','','',''),('p','built-in/admin','app-built-in','write','','',''),('p','built-in/admin','app-built-in','admin','','','');
 /*!40000 ALTER TABLE `permission_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 

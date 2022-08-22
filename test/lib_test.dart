@@ -207,6 +207,8 @@ void main() async {
       expect(Client.currentUser?.ranking, greaterThan(1));
 
       expect(resp.status, "ok", reason: "raw resp: $resp");
+
+      await Client.logout();
     });
 
     test("Login with username and error password", () async {
@@ -244,9 +246,6 @@ void main() async {
       HttpResult resp = await Client.sendCode(phone, type: AccountType.phone);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      // expect(resp.status, "ok",
-      //     reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-
       IResultSet query = await db!.execute(
         "select code from verification_record where receiver like '%$phone' order by created_time desc limit 1",
       );
@@ -284,6 +283,7 @@ void main() async {
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       await cleanVerificationRecordAddr();
+      await Client.logout();
     });
 
     test("Login with phone code", () async {
@@ -317,6 +317,95 @@ void main() async {
 
       // clean
       await cleanVerificationRecordAddr();
+      await Client.logout();
+    });
+  });
+
+  group("regsiter by email", () {
+    String username = "user_${getRandomString(5)}";
+    String email = "$username@test.com";
+
+    debugPrint("--== email: $email ==--\n");
+
+    test("Register with email and password", () async {
+      HttpResult codeResp =
+          await Client.sendCode(email, type: AccountType.email);
+      expect(codeResp.code, 200,
+          reason:
+              "resp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      HttpResult resp = await Client.registerByEmail(email, code,
+          password: password, username: username);
+      expect(resp.code, 200);
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.jsonBody?["data"], "$orgnazationName/$username");
+
+      await cleanVerificationRecordAddr();
+    });
+
+    test("Login with email and password", () async {
+      HttpResult resp = await Client.loginByUserName(email, password);
+
+      debugPrint("--== logined ==--\n${jsonEncode(Client.currentUser)}\n\n");
+      expect(resp.code, 200);
+      expect(Client.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(Client.currentUser?.email, email);
+      expect(Client.currentUser?.id, isNotEmpty);
+      expect(Client.currentUser?.avatar, isNotEmpty);
+      expect(Client.currentUser?.owner, orgnazationName);
+      expect(Client.currentUser?.signupApplication, appName);
+      expect(Client.currentUser?.score, 2000);
+      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      await cleanVerificationRecordAddr();
+      await Client.logout();
+    });
+
+    test("Login with email and code", () async {
+      HttpResult codeResp =
+          await Client.sendCode(email, type: AccountType.email);
+      expect(codeResp.code, 200,
+          reason:
+              "codeResp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      HttpResult resp =
+          await Client.loginByCode(email, code, type: AccountType.email);
+      expect(resp.code, 200);
+      expect(Client.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(Client.currentUser?.email, email);
+      expect(Client.currentUser?.id, isNotEmpty);
+      expect(Client.currentUser?.avatar, isNotEmpty);
+      expect(Client.currentUser?.owner, orgnazationName);
+      expect(Client.currentUser?.signupApplication, appName);
+      expect(Client.currentUser?.score, 2000);
+      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      // clean
+      await cleanVerificationRecordAddr();
+      await Client.logout();
     });
   });
 }

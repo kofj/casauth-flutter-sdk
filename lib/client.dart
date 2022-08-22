@@ -2,6 +2,7 @@ library casauth;
 
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
 
@@ -42,7 +43,7 @@ class Client {
   static Future<HttpResult> loginByUserName(
     String username,
     String password, {
-    bool autoSignin = true,
+    bool autoSignin = false,
   }) async {
     var payload = jsonEncode({
       'username': username,
@@ -103,8 +104,8 @@ class Client {
   static Future<HttpResult> loginByCode(
     String phoneOrEmail,
     String code, {
-    String type = "phone",
-    bool autoSignin = true,
+    AccountType type = AccountType.phone,
+    bool autoSignin = false,
     String countryCode = "86",
   }) async {
     if (type == "phone" && !isCnPhoneNumber(phoneOrEmail)) {
@@ -135,10 +136,50 @@ class Client {
     return resp;
   }
 
+  static Future<HttpResult> registerByEmail(
+    String email,
+    String code, {
+    String username = '',
+    String password = '',
+  }) async {
+    if (username.isEmpty && CASAuth.config.requiredSignupItem("Username")) {
+      username = "${CASAuth.randomUsernamePrefix}${getRandomString(5)}";
+    }
+
+    if (password.isEmpty && CASAuth.config.requiredSignupItem("Password")) {
+      password = getRandomString(12);
+    }
+
+    var payload = jsonEncode({
+      'email': email,
+      'emailCode': code,
+      'username': username,
+      'password': password,
+      'appId': CASAuth.appId,
+      'application': CASAuth.app,
+      'organization': CASAuth.organization,
+    });
+    HttpResult resp = await post('/api/signup', payload);
+
+    return resp;
+  }
+
   static Future<CaptchaResult> getCaptcha() async {
     HttpResult resp = await get(
         '/api/get-captcha?applicationId=admin/app-built-in&isCurrentProvider=false');
     return CaptchaResult(resp);
+  }
+
+  static Future<HttpResult?> logout() async {
+    HttpResult resp = await get('/api/login/oauth/logout?id_token_hint=$token');
+
+    if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
+      token = null;
+      currentUser = null;
+      return resp;
+    }
+
+    return resp;
   }
 
 // sendCode sends a verification code to the user's phone or email
