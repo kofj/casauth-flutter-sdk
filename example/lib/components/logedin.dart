@@ -63,31 +63,34 @@ class _LogedInState extends State<LogedIn> {
 
     String json = jsonEncode(user);
 
-    return Column(children: [
-      CircleAvatar(
-        backgroundImage: avatar,
-        minRadius: 32,
-        maxRadius: 64,
-      ),
-      const SizedBox(height: 20),
-      Text("ID: ${user.id}"),
-      const SizedBox(height: 20),
-      Text("User Name: ${user.name}  \tEmail: ${user.email}"),
-      const SizedBox(height: 20),
-      SizedBox(
-        height: 300,
-        child: SingleChildScrollView(
-          child: ColoredJson(
-            data: json,
-            indentLength: 2,
+    return Column(
+      children: [
+        CircleAvatar(
+          backgroundImage: avatar,
+          minRadius: 32,
+          maxRadius: 64,
+        ),
+        const SizedBox(height: 20),
+        Text("ID: ${user.id}"),
+        const SizedBox(height: 20),
+        Text("User Name: ${user.name}  \tEmail: ${user.email}"),
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 300,
+          child: SingleChildScrollView(
+            child: ColoredJson(
+              data: json,
+              indentLength: 2,
+            ),
           ),
         ),
-      ),
-      const SizedBox(height: 20),
-      ElevatedButton(
-        onPressed: () => logoutOnPressed(context),
-        child: const Text("Logout"),
-      ),
-    ]);
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () => logoutOnPressed(context),
+          child: const Text("Logout"),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }

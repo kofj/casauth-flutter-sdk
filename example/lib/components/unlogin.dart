@@ -24,7 +24,7 @@ class _UnloginState extends State<Unlogin> {
         child: const Text("Login"),
       ),
       const SizedBox(
-        height: 130,
+        height: 20,
       ),
       TextButton(
         onPressed: () {
