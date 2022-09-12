@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 import 'dart:ui';
@@ -34,21 +35,28 @@ void main() async {
     log("dev.env not found, use default config");
   });
 
-  await loadConfigFromDotEnv("prod.env").then((value) {
-    prodConfig = value;
+  try {
+    prodConfig = await loadConfigFromDotEnv("prod.env");
     if (appMode == AppMode.prod) {
       config = prodConfig;
     }
-
-    runApp(const MyApp());
-  }).catchError((e) {
+  } catch (e) {
     log("load prod.env error: ${e.toString()}");
     exit(1);
-  });
+  }
 
-  // FlutterError.onError = (FlutterErrorDetails details) {
-  //   FlutterError.dumpErrorToConsole(details);
-  // };
+  runZonedGuarded<Future<void>>(
+    () async {
+      FlutterError.onError = (FlutterErrorDetails details) {
+        log("exception: ${details.exception}\n${details.stack}");
+      };
+
+      runApp(const MyApp());
+    },
+    ((error, stackTrace) {
+      log("Error: $error\n\n${stackTrace.toString()}");
+    }),
+  );
 }
 
 Future<Config> loadConfigFromDotEnv(String file) async {
