@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'pages/LoginPage/Login.dart';
+import 'pages/LoginPage/log_in.dart';
 
 String appName = "testapp";
 String appId = "dc4b4df2fcfa9d2ef765";
