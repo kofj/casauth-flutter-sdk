@@ -1,5 +1,6 @@
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
+import 'package:casauth_demo/utils/cacheimage.dart';
 import 'package:flutter/material.dart';
 
 @immutable
@@ -17,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     usernameController.dispose();
-    // passwordController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
@@ -42,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
                 borderRadius: BorderRadius.circular(200),
               ),
               child: Center(
-                child: Image.network(CASAuth.config.logo),
+                child: cachedImage(CASAuth.config.logo),
               ),
             ),
             Padding(

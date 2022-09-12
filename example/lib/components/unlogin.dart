@@ -28,7 +28,10 @@ class _UnloginState extends State<Unlogin> {
       ),
       TextButton(
         onPressed: () {
-          // Navigator.pushNamed(context, "/signup");
+          Navigator.pushNamed(context, "/signup").then((value) {
+            log("update home page state, callback value: $value");
+            widget.notifyParent();
+          });
         },
         style: ButtonStyle(
           foregroundColor: MaterialStateProperty.all<Color>(Colors.black54),

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:developer';
 import 'dart:ui';
+import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -27,6 +28,7 @@ void main() async {
   rootBundle.loadString("dev.env").then((value) async {
     if (value.isNotEmpty) {
       devConfig = await loadConfigFromDotEnv("dev.env");
+      config = devConfig;
     }
   }).catchError((e) {
     log("dev.env not found, use default config");
@@ -52,7 +54,7 @@ void main() async {
 Future<Config> loadConfigFromDotEnv(String file) async {
   var dot = DotEnv();
   await dot.load(fileName: file);
-  config = Config(
+  var config = Config(
     appId: dot.env["CAS_APPID"].toString(),
     server: dot.env["CAS_SERVER"].toString(),
     appName: dot.env["CAS_APPNAME"].toString(),
@@ -91,6 +93,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "/": (context) => const MyHomePage(title: 'CASAuth'),
         "/login": (context) => const LoginPage(),
+        "/signup": (context) => const Signup(),
       },
     );
   }
@@ -153,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget buildAppModeIcon() {
     if (appMode == AppMode.dev) {
-      return const Icon(Icons.developer_mode);
+      return const Icon(Icons.electrical_services);
     } else {
       return const Icon(Icons.new_releases);
     }

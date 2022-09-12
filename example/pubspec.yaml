@@ -41,6 +41,7 @@ dependencies:
   flutter_svg_provider: ^1.0.3
   colored_json: ^1.1.0
   flutter_dotenv: ^5.0.2
+  cached_network_image: ^3.2.2
 
 dev_dependencies:
   flutter_test:
