@@ -145,6 +145,18 @@ class Config {
     return false;
   }
 
+  bool get hasSignupEmail => hasSignupItem("Email");
+  bool get hasSignupPhone => hasSignupItem("Phone");
+  bool get hasSignupUsername => hasSignupItem("Username");
+  bool get hasSignupPassword => hasSignupItem("Password");
+  bool get hasSignupDisplayName => hasSignupItem("Display name");
+
+  bool get requiredSignupEmail => requiredSignupItem("Email");
+  bool get requiredSignupPhone => requiredSignupItem("Phone");
+  bool get requiredSignupUsername => requiredSignupItem("Username");
+  bool get requiredSignupPassword => requiredSignupItem("Password");
+  bool get requiredSignupDisplayName => requiredSignupItem("Display name");
+
   String getGrantTokenType() {
     if (grantTypes.isEmpty) {
       return "";

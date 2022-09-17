@@ -16,18 +16,24 @@ class Client {
 // register a new user by username and password
   static Future<HttpResult> registerByUserName(
     String username,
-    String password,
-  ) async {
-    if (CASAuth.config.requiredSignupItem("Email") ||
-        CASAuth.config.requiredSignupItem("Phone")) {
+    String password, {
+    String displayName = "",
+  }) async {
+    if (CASAuth.config.requiredSignupEmail ||
+        CASAuth.config.requiredSignupPhone) {
       throw ("Email and/or Phone is required, cannot signup with username only");
     }
-    if (!CASAuth.config.hasSignupItem("Username")) {
-      throw ("Username is exists, cannot signup with username");
+    if (CASAuth.config.requiredSignupDisplayName && displayName.isEmpty) {
+      displayName = username;
+    }
+
+    if (!CASAuth.config.hasSignupUsername) {
+      throw ("Username is not exists, cannot signup with username");
     }
     var payload = jsonEncode({
       'username': username,
       'password': password,
+      'displayName': displayName,
       'appId': CASAuth.appId,
       'application': CASAuth.app,
       'organization': CASAuth.organization,
@@ -66,17 +72,20 @@ class Client {
   static Future<HttpResult> registerByPhone(
     String phone,
     String code, {
-    String? username,
-    String? password,
+    String username = '',
+    String password = '',
+    String displayName = '',
     String countryCode = "86",
   }) async {
-    if ((username == null || username.isEmpty) &&
-        CASAuth.config.requiredSignupItem("Username")) {
+    if ((username.isEmpty) && CASAuth.config.requiredSignupUsername) {
       username = "${CASAuth.randomUsernamePrefix}${getRandomString(5)}";
     }
 
-    if ((password == null || password.isEmpty) &&
-        CASAuth.config.requiredSignupItem("Password")) {
+    if (CASAuth.config.requiredSignupDisplayName && displayName.isEmpty) {
+      displayName = username;
+    }
+
+    if ((password.isEmpty) && CASAuth.config.requiredSignupPassword) {
       password = getRandomString(12);
     }
 
@@ -90,6 +99,7 @@ class Client {
       'phonePrefix': countryCode,
       'username': username,
       'password': password,
+      'displayName': displayName,
       'appId': CASAuth.appId,
       'application': CASAuth.app,
       'organization': CASAuth.organization,
@@ -154,12 +164,16 @@ class Client {
     String code, {
     String username = '',
     String password = '',
+    String displayName = '',
   }) async {
-    if (username.isEmpty && CASAuth.config.requiredSignupItem("Username")) {
+    if (username.isEmpty && CASAuth.config.requiredSignupUsername) {
       username = "${CASAuth.randomUsernamePrefix}${getRandomString(5)}";
     }
+    if (CASAuth.config.requiredSignupDisplayName && displayName.isEmpty) {
+      displayName = username;
+    }
 
-    if (password.isEmpty && CASAuth.config.requiredSignupItem("Password")) {
+    if (password.isEmpty && CASAuth.config.requiredSignupPassword) {
       password = getRandomString(12);
     }
 
@@ -167,6 +181,7 @@ class Client {
       'email': email,
       'emailCode': code,
       'username': username,
+      'displayName': displayName,
       'password': password,
       'appId': CASAuth.appId,
       'application': CASAuth.app,
