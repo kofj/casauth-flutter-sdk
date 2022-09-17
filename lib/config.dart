@@ -269,7 +269,9 @@ class ProviderElement {
     canUnlink = json["canUnlink"];
     prompted = json["prompted"];
     alertType = json["alertType"];
-    provider = ProviderProvider.fromJson(json["provider"]);
+    if (json['provider'] != null) {
+      provider = ProviderProvider.fromJson(json["provider"]);
+    }
   }
 
   Map<String, dynamic> toJson() => {

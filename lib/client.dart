@@ -1,8 +1,6 @@
 library casauth;
 
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
 
@@ -108,12 +106,27 @@ class Client {
     bool autoSignin = false,
     String countryCode = "86",
   }) async {
-    if (type == "phone" && !isCnPhoneNumber(phoneOrEmail)) {
-      throw ("Phone number is not allowed");
-    }
+    switch (type) {
+      case AccountType.phone:
+        {
+          if (!isCnPhoneNumber(phoneOrEmail)) {
+            throw ("Phone number is not allowed");
+          }
+          break;
+        }
 
-    if (type == "email" && !EmailValidator.validate(phoneOrEmail)) {
-      throw ("Email is not valid");
+      case AccountType.email:
+        {
+          if (!EmailValidator.validate(phoneOrEmail)) {
+            throw ("Email is not valid");
+          }
+          break;
+        }
+
+      default:
+        {
+          // nothing
+        }
     }
 
     var payload = jsonEncode({

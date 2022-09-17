@@ -42,7 +42,7 @@ services:
     restart: always
     working_dir: /workspace/
     network_mode: "service:mysql"
-    image:  cirrusci/flutter:3.0.4
+    image:  cirrusci/flutter:3.3.0
     container_name: casdoor.flutter
     entrypoint: /bin/sh -c 'sleep 6000'
     depends_on:

@@ -30,7 +30,7 @@ jobs:
           images: |
             mysql:8.0.25
             casbin/casdoor:v1.79.0
-            cirrusci/flutter:3.0.4
+            cirrusci/flutter:3.3.0
             mailhog/mailhog:latest
 
       - name: Start Local Casdoor
