@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.2
+date: 2022-09-18
+changes:
+- refactoring.
+- persist storage token.
+
 ## 1.1.0
 date: 2022-09-18
 changes:
