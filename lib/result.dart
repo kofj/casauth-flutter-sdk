@@ -5,6 +5,7 @@ class AuthResult {
   late String? status = "";
   late String? message = "";
   late Map<String, dynamic>? jsonBody;
+  late List<dynamic>? listBody;
 
   AuthResult(int respCode,
       {String? respStatus, String? respMessage, Map<String, dynamic>? body}) {

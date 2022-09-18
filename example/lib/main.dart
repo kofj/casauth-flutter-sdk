@@ -117,13 +117,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isLogin = false;
+
   @override
   void initState() {
     super.initState();
+
     initSDK();
+    updateLoginState();
+  }
+
+  void updateLoginState() {
+    CASAuth.getToken().then((value) {
+      log("current token: ${value?.isEmpty}");
+      if (value != null && value.isNotEmpty) {
+        AuthClient.userInfo().then((v) {
+          log("user info");
+          setState(() {
+            _isLogin = true;
+          });
+        });
+      } else {
+        setState(() {
+          _isLogin = false;
+        });
+      }
+    });
   }
 
   void refresh() {
+    updateLoginState();
     setState(() {});
   }
 
@@ -183,10 +206,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     var list = <Widget>[SizedBox(height: appbar.preferredSize.height)];
 
-    if (AuthClient.currentUser == null) {
-      list.add(Center(child: Unlogin(notifyParent: refresh)));
-    } else {
+    if (_isLogin) {
       list.add(Center(child: LogedIn(notifyParent: refresh)));
+    } else {
+      list.add(Center(child: Unlogin(notifyParent: refresh)));
     }
     // ignore: prefer_const_constructors
     list.add(EnvInfo());

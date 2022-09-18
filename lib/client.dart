@@ -1,6 +1,7 @@
 library casauth;
 
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
 
@@ -63,6 +64,7 @@ class AuthClient {
     token = resp.jsonBody?['data'];
     currentUser = null;
     if (resp.code == 200 && token != null && token!.isNotEmpty) {
+      await CASAuth.setToken(token!);
       await userInfo();
     }
     return resp;
@@ -154,6 +156,7 @@ class AuthClient {
     token = resp.jsonBody?['data'];
     currentUser = null;
     if (resp.code == 200 && token != null && token!.isNotEmpty) {
+      await CASAuth.setToken(token!);
       await userInfo();
     }
     return resp;
@@ -204,6 +207,7 @@ class AuthClient {
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
       token = null;
       currentUser = null;
+      await CASAuth.rmToken();
       return resp;
     }
 
@@ -231,12 +235,17 @@ class AuthClient {
     return await post("/api/send-verification-code", body, extHeader);
   }
 
-  static Future<void> userInfo() async {
+  static Future<bool> userInfo() async {
     AuthResult resp = await get('/api/get-account');
+    if (resp.status == "error") {
+      log("get user info failed: ${resp.message}");
+      return false;
+    }
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
     if (resp.code == 200 && json.isNotEmpty) {
       currentUser = User.fromJson(json);
     }
+    return true;
   }
 
   static Future<AuthResult> get(String endpoint,
@@ -266,6 +275,9 @@ class AuthClient {
     if (headers["content-type"] == null || headers["content-type"] == "") {
       headers["content-type"] = "application/json";
     }
+
+    token ??= await CASAuth.getToken();
+
     if (token != null) {
       headers["Authorization"] = "Bearer $token";
     }
@@ -295,10 +307,15 @@ class AuthClient {
       result.message = body;
       return result;
     }
+
     var data = jsonDecode(body);
-    result.jsonBody = data;
-    result.status = data['status'];
-    result.message = data['msg'];
+    if (data is List<dynamic>) {
+      result.listBody = data;
+    } else {
+      result.jsonBody = data;
+      result.status = data['status'];
+      result.message = data['msg'];
+    }
 
     return result;
   }

@@ -1,6 +1,7 @@
 library casauth;
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config.dart';
 
@@ -55,4 +56,21 @@ class CASAuth {
           "Application's OAuth grantTypes must has token and/or id_token");
     }
   }
+
+  static Future<bool> setToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setString(keyToken, token);
+  }
+
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(keyToken);
+  }
+
+  static Future<bool> rmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.remove(keyToken);
+  }
 }
+
+String keyToken = "casauth_token";
