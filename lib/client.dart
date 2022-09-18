@@ -9,12 +9,12 @@ import 'package:casauth/casauth.dart';
 import 'package:casauth/result.dart';
 import 'package:casauth/user.dart';
 
-class Client {
+class AuthClient {
   static User? currentUser;
   static String? token;
 
 // register a new user by username and password
-  static Future<HttpResult> registerByUserName(
+  static Future<AuthResult> registerByUserName(
     String username,
     String password, {
     String displayName = "",
@@ -39,12 +39,12 @@ class Client {
       'organization': CASAuth.organization,
     });
 
-    HttpResult resp = await post('/api/signup', payload);
+    AuthResult resp = await post('/api/signup', payload);
 
     return resp;
   }
 
-  static Future<HttpResult> loginByUserName(
+  static Future<AuthResult> loginByUserName(
     String username,
     String password, {
     bool autoSignin = false,
@@ -59,7 +59,7 @@ class Client {
       'type': CASAuth.config.getGrantTokenType(),
     });
 
-    HttpResult resp = await post('/api/login', payload);
+    AuthResult resp = await post('/api/login', payload);
     token = resp.jsonBody?['data'];
     currentUser = null;
     if (resp.code == 200 && token != null && token!.isNotEmpty) {
@@ -69,7 +69,7 @@ class Client {
   }
 
 // will generate username and password if not provided and required
-  static Future<HttpResult> registerByPhone(
+  static Future<AuthResult> registerByPhone(
     String phone,
     String code, {
     String username = '',
@@ -104,12 +104,12 @@ class Client {
       'application': CASAuth.app,
       'organization': CASAuth.organization,
     });
-    HttpResult resp = await post('/api/signup', payload);
+    AuthResult resp = await post('/api/signup', payload);
 
     return resp;
   }
 
-  static Future<HttpResult> loginByCode(
+  static Future<AuthResult> loginByCode(
     String phoneOrEmail,
     String code, {
     AccountType type = AccountType.phone,
@@ -150,7 +150,7 @@ class Client {
       'type': CASAuth.config.getGrantTokenType(),
     });
 
-    HttpResult resp = await post('/api/login', payload);
+    AuthResult resp = await post('/api/login', payload);
     token = resp.jsonBody?['data'];
     currentUser = null;
     if (resp.code == 200 && token != null && token!.isNotEmpty) {
@@ -159,7 +159,7 @@ class Client {
     return resp;
   }
 
-  static Future<HttpResult> registerByEmail(
+  static Future<AuthResult> registerByEmail(
     String email,
     String code, {
     String username = '',
@@ -187,19 +187,19 @@ class Client {
       'application': CASAuth.app,
       'organization': CASAuth.organization,
     });
-    HttpResult resp = await post('/api/signup', payload);
+    AuthResult resp = await post('/api/signup', payload);
 
     return resp;
   }
 
   static Future<CaptchaResult> getCaptcha() async {
-    HttpResult resp = await get(
+    AuthResult resp = await get(
         '/api/get-captcha?applicationId=admin/app-built-in&isCurrentProvider=false');
     return CaptchaResult(resp);
   }
 
-  static Future<HttpResult?> logout() async {
-    HttpResult resp = await get('/api/login/oauth/logout?id_token_hint=$token');
+  static Future<AuthResult?> logout() async {
+    AuthResult resp = await get('/api/login/oauth/logout?id_token_hint=$token');
 
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
       token = null;
@@ -211,7 +211,7 @@ class Client {
   }
 
 // sendCode sends a verification code to the user's phone or email
-  static Future<HttpResult> sendCode(
+  static Future<AuthResult> sendCode(
     String dest, {
     AccountType? type = AccountType.phone,
     String? checkId = "",
@@ -220,7 +220,7 @@ class Client {
     String? checkUser = "",
   }) async {
     if (type != AccountType.phone && type != AccountType.email) {
-      return HttpResult(400,
+      return AuthResult(400,
           respStatus: "error", respMessage: "invalid account type: $type");
     }
     String body =
@@ -232,27 +232,27 @@ class Client {
   }
 
   static Future<void> userInfo() async {
-    HttpResult resp = await get('/api/get-account');
+    AuthResult resp = await get('/api/get-account');
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
     if (resp.code == 200 && json.isNotEmpty) {
       currentUser = User.fromJson(json);
     }
   }
 
-  static Future<HttpResult> get(String endpoint,
+  static Future<AuthResult> get(String endpoint,
       {Map<String, String>? extHeaders}) async {
     String url = CASAuth.server + endpoint;
 
     return request("get", url, null, extHeaders);
   }
 
-  static Future<HttpResult> post(String endpoint,
+  static Future<AuthResult> post(String endpoint,
       [String? body, Map<String, String>? extHeaders]) async {
     String url = CASAuth.server + endpoint;
     return request("post", url, body, extHeaders);
   }
 
-  static Future<HttpResult> request(String method, String uri,
+  static Future<AuthResult> request(String method, String uri,
       [String? body, Map<String, String>? extHeaders]) async {
     var url = Uri.parse(uri);
     Map<String, String> headers = {
@@ -282,8 +282,8 @@ class Client {
     return parseResponse(response);
   }
 
-  static HttpResult parseResponse(http.Response? resp) {
-    HttpResult result = HttpResult(
+  static AuthResult parseResponse(http.Response? resp) {
+    AuthResult result = AuthResult(
       resp?.statusCode ?? 0,
     );
     if (resp == null) {

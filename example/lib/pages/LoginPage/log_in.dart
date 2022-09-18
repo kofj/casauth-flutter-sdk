@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                   String username = usernameController.text;
                   String password = passwordController.text;
                   try {
-                    Client.loginByUserName(username, password).then((resp) {
+                    AuthClient.loginByUserName(username, password).then((resp) {
                       if (resp.status == "error") {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

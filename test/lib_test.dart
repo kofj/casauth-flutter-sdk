@@ -93,7 +93,7 @@ void main() async {
 
       expect(rs.affectedRows.toInt(), greaterThan(-1));
 
-      CaptchaResult resp = await Client.getCaptcha();
+      CaptchaResult resp = await AuthClient.getCaptcha();
       expect(resp.code, 200);
       expect(resp.status, "ok");
       expect(resp.message, isEmpty);
@@ -119,7 +119,7 @@ void main() async {
 
       expect(rs.affectedRows, BigInt.one);
 
-      CaptchaResult resp = await Client.getCaptcha();
+      CaptchaResult resp = await AuthClient.getCaptcha();
       expect(resp.code, 200);
       expect(resp.status, "ok");
       expect(resp.message, isEmpty);
@@ -132,14 +132,14 @@ void main() async {
 
   group("send verfiy code | ", () {
     test("invalid account type", () async {
-      HttpResult resp =
-          await Client.sendCode("dest", type: AccountType.username);
+      AuthResult resp =
+          await AuthClient.sendCode("dest", type: AccountType.username);
       expect(resp.code, 400);
     });
 
     test("phone", () async {
-      HttpResult resp =
-          await Client.sendCode("18888888888", type: AccountType.phone);
+      AuthResult resp =
+          await AuthClient.sendCode("18888888888", type: AccountType.phone);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "ok",
@@ -149,8 +149,8 @@ void main() async {
     });
 
     test("email", () async {
-      HttpResult resp =
-          await Client.sendCode("me@example.com", type: AccountType.email);
+      AuthResult resp =
+          await AuthClient.sendCode("me@example.com", type: AccountType.email);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "ok",
@@ -158,8 +158,8 @@ void main() async {
     });
 
     test("email limit", () async {
-      HttpResult resp =
-          await Client.sendCode("me@example.com", type: AccountType.email);
+      AuthResult resp =
+          await AuthClient.sendCode("me@example.com", type: AccountType.email);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "error",
@@ -175,7 +175,7 @@ void main() async {
     String username = "user_${getRandomString(5)}";
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","agreement":true, "appId": "dc4b4df2fcfa9d2ef765"}' | http POST 'http://localhost:8000/api/signup'
     test("Register with username and password", () async {
-      HttpResult resp = await Client.registerByUserName(username, password);
+      AuthResult resp = await AuthClient.registerByUserName(username, password);
       expect(resp.code, 200);
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
@@ -183,7 +183,7 @@ void main() async {
     });
 
     test("Username exists", () async {
-      HttpResult resp = await Client.registerByUserName(username, password);
+      AuthResult resp = await AuthClient.registerByUserName(username, password);
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
       expect(resp.status, "error",
@@ -194,45 +194,45 @@ void main() async {
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","autoSignin":true,"type":"id_token","phonePrefix":"86","samlRequest":""}' |http 'http://localhost:8000/api/login'
 
     test("Login with username and password", () async {
-      HttpResult resp = await Client.loginByUserName(username, password);
+      AuthResult resp = await AuthClient.loginByUserName(username, password);
       expect(resp.code, 200);
-      expect(Client.currentUser, isNotNull);
+      expect(AuthClient.currentUser, isNotNull);
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(Client.currentUser?.id, isNotEmpty);
-      expect(Client.currentUser?.name, username);
-      expect(Client.currentUser?.avatar, isNotEmpty);
-      expect(Client.currentUser?.owner, orgnazationName);
-      expect(Client.currentUser?.signupApplication, appName);
-      expect(Client.currentUser?.score, 2000);
-      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(AuthClient.currentUser?.id, isNotEmpty);
+      expect(AuthClient.currentUser?.name, username);
+      expect(AuthClient.currentUser?.avatar, isNotEmpty);
+      expect(AuthClient.currentUser?.owner, orgnazationName);
+      expect(AuthClient.currentUser?.signupApplication, appName);
+      expect(AuthClient.currentUser?.score, 2000);
+      expect(AuthClient.currentUser?.ranking, greaterThan(1));
 
       expect(resp.status, "ok", reason: "raw resp: $resp");
 
-      await Client.logout();
+      await AuthClient.logout();
     });
 
     test("Login with username and error password", () async {
-      HttpResult resp =
-          await Client.loginByUserName(username, "error_password");
+      AuthResult resp =
+          await AuthClient.loginByUserName(username, "error_password");
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      expect(Client.currentUser, null,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, null,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
     });
 
     test("Login with username that not exists", () async {
-      HttpResult resp =
-          await Client.loginByUserName("user_not_exists", "hUQxzNTPw7IL");
+      AuthResult resp =
+          await AuthClient.loginByUserName("user_not_exists", "hUQxzNTPw7IL");
       expect(resp.code, 200);
       expect(resp.jsonBody?["data"], isNull);
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      expect(Client.currentUser, null,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, null,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
     });
   });
 
@@ -243,7 +243,8 @@ void main() async {
     debugPrint("--== phone: $phone ==--\n");
 
     test("Register with phone and password", () async {
-      HttpResult resp = await Client.sendCode(phone, type: AccountType.phone);
+      AuthResult resp =
+          await AuthClient.sendCode(phone, type: AccountType.phone);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       IResultSet query = await db!.execute(
@@ -254,7 +255,7 @@ void main() async {
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);
 
-      HttpResult resp2 = await Client.registerByPhone(phone, code,
+      AuthResult resp2 = await AuthClient.registerByPhone(phone, code,
           password: password, username: username);
       expect(resp2.code, 200);
       expect(resp2.status, "ok",
@@ -265,30 +266,31 @@ void main() async {
     });
 
     test("Login with phone and password", () async {
-      HttpResult resp = await Client.loginByUserName(phone, password);
+      AuthResult resp = await AuthClient.loginByUserName(phone, password);
 
-      debugPrint("--== logined ==--\n${jsonEncode(Client.currentUser)}\n\n");
+      debugPrint(
+          "--== logined ==--\n${jsonEncode(AuthClient.currentUser)}\n\n");
       expect(resp.code, 200);
-      expect(Client.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(Client.currentUser?.phone, phone);
-      expect(Client.currentUser?.id, isNotEmpty);
-      expect(Client.currentUser?.avatar, isNotEmpty);
-      expect(Client.currentUser?.owner, orgnazationName);
-      expect(Client.currentUser?.signupApplication, appName);
-      expect(Client.currentUser?.score, 2000);
-      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(AuthClient.currentUser?.phone, phone);
+      expect(AuthClient.currentUser?.id, isNotEmpty);
+      expect(AuthClient.currentUser?.avatar, isNotEmpty);
+      expect(AuthClient.currentUser?.owner, orgnazationName);
+      expect(AuthClient.currentUser?.signupApplication, appName);
+      expect(AuthClient.currentUser?.score, 2000);
+      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       await cleanVerificationRecordAddr();
-      await Client.logout();
+      await AuthClient.logout();
     });
 
     test("Login with phone code", () async {
-      HttpResult codeResp =
-          await Client.sendCode(phone, type: AccountType.phone);
+      AuthResult codeResp =
+          await AuthClient.sendCode(phone, type: AccountType.phone);
       expect(codeResp.code, 200,
           reason:
               "codeResp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
@@ -300,24 +302,24 @@ void main() async {
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);
 
-      HttpResult resp = await Client.loginByCode(phone, code);
+      AuthResult resp = await AuthClient.loginByCode(phone, code);
       expect(resp.code, 200);
-      expect(Client.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(Client.currentUser?.phone, phone);
-      expect(Client.currentUser?.id, isNotEmpty);
-      expect(Client.currentUser?.avatar, isNotEmpty);
-      expect(Client.currentUser?.owner, orgnazationName);
-      expect(Client.currentUser?.signupApplication, appName);
-      expect(Client.currentUser?.score, 2000);
-      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(AuthClient.currentUser?.phone, phone);
+      expect(AuthClient.currentUser?.id, isNotEmpty);
+      expect(AuthClient.currentUser?.avatar, isNotEmpty);
+      expect(AuthClient.currentUser?.owner, orgnazationName);
+      expect(AuthClient.currentUser?.signupApplication, appName);
+      expect(AuthClient.currentUser?.score, 2000);
+      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       // clean
       await cleanVerificationRecordAddr();
-      await Client.logout();
+      await AuthClient.logout();
     });
   });
 
@@ -328,8 +330,8 @@ void main() async {
     debugPrint("--== email: $email ==--\n");
 
     test("Register with email and password", () async {
-      HttpResult codeResp =
-          await Client.sendCode(email, type: AccountType.email);
+      AuthResult codeResp =
+          await AuthClient.sendCode(email, type: AccountType.email);
       expect(codeResp.code, 200,
           reason:
               "resp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
@@ -341,7 +343,7 @@ void main() async {
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);
 
-      HttpResult resp = await Client.registerByEmail(email, code,
+      AuthResult resp = await AuthClient.registerByEmail(email, code,
           password: password, username: username);
       expect(resp.code, 200);
       expect(resp.status, "ok",
@@ -352,30 +354,31 @@ void main() async {
     });
 
     test("Login with email and password", () async {
-      HttpResult resp = await Client.loginByUserName(email, password);
+      AuthResult resp = await AuthClient.loginByUserName(email, password);
 
-      debugPrint("--== logined ==--\n${jsonEncode(Client.currentUser)}\n\n");
+      debugPrint(
+          "--== logined ==--\n${jsonEncode(AuthClient.currentUser)}\n\n");
       expect(resp.code, 200);
-      expect(Client.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(Client.currentUser?.email, email);
-      expect(Client.currentUser?.id, isNotEmpty);
-      expect(Client.currentUser?.avatar, isNotEmpty);
-      expect(Client.currentUser?.owner, orgnazationName);
-      expect(Client.currentUser?.signupApplication, appName);
-      expect(Client.currentUser?.score, 2000);
-      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(AuthClient.currentUser?.email, email);
+      expect(AuthClient.currentUser?.id, isNotEmpty);
+      expect(AuthClient.currentUser?.avatar, isNotEmpty);
+      expect(AuthClient.currentUser?.owner, orgnazationName);
+      expect(AuthClient.currentUser?.signupApplication, appName);
+      expect(AuthClient.currentUser?.score, 2000);
+      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       await cleanVerificationRecordAddr();
-      await Client.logout();
+      await AuthClient.logout();
     });
 
     test("Login with email and code", () async {
-      HttpResult codeResp =
-          await Client.sendCode(email, type: AccountType.email);
+      AuthResult codeResp =
+          await AuthClient.sendCode(email, type: AccountType.email);
       expect(codeResp.code, 200,
           reason:
               "codeResp: ${codeResp.code}/${codeResp.status}/${codeResp.message}");
@@ -387,25 +390,25 @@ void main() async {
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);
 
-      HttpResult resp =
-          await Client.loginByCode(email, code, type: AccountType.email);
+      AuthResult resp =
+          await AuthClient.loginByCode(email, code, type: AccountType.email);
       expect(resp.code, 200);
-      expect(Client.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(Client.currentUser)}");
+      expect(AuthClient.currentUser, isNotNull,
+          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(Client.currentUser?.email, email);
-      expect(Client.currentUser?.id, isNotEmpty);
-      expect(Client.currentUser?.avatar, isNotEmpty);
-      expect(Client.currentUser?.owner, orgnazationName);
-      expect(Client.currentUser?.signupApplication, appName);
-      expect(Client.currentUser?.score, 2000);
-      expect(Client.currentUser?.ranking, greaterThan(1));
+      expect(AuthClient.currentUser?.email, email);
+      expect(AuthClient.currentUser?.id, isNotEmpty);
+      expect(AuthClient.currentUser?.avatar, isNotEmpty);
+      expect(AuthClient.currentUser?.owner, orgnazationName);
+      expect(AuthClient.currentUser?.signupApplication, appName);
+      expect(AuthClient.currentUser?.score, 2000);
+      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
       // clean
       await cleanVerificationRecordAddr();
-      await Client.logout();
+      await AuthClient.logout();
     });
   });
 }

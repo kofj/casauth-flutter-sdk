@@ -26,6 +26,8 @@ In the [example](example) folder has a full app example develop with Flutter v3.
 ### initiate
 
 ```dart
+import 'package:casauth/casauth.dart';
+
 String appId = "some-app-id";
 String appName = "app-example";
 String orgnazationName = "casbin";
@@ -41,19 +43,14 @@ CASAuth(
 ### login
 
 ```dart
-HttpResult resp =  Client.loginByUserName(username, password);
-```
-
-
-```dart
-HttpResult resp =  Client.loginByUserName(username, password);
+AuthResult resp =  AuthClient.loginByUserName(username, password);
 ```
 
 ### register
 
 Register new user only with `username` and `password`. If `displayName` is required by casdoor, it will be same with `username`.
 ```dart
-HttpResult resp = await Client.registerByUserName(username, password);
+AuthResult resp = await AuthClient.registerByUserName(username, password);
 
 if (resp.status == "error") {
   // handle error
@@ -66,7 +63,7 @@ if (resp.status == "error") {
 Regsiter new user with `email` and `verification code`, `username`, `password` and `displayName` is optional. if `username` adn `password` is required by casdoor, it will be filled with random string.
 
 ```dart
-HttpResult resp = await Client.registerByEmail(
+AuthResult resp = await AuthClient.registerByEmail(
   email,
   verifyCode,
   username: username,
@@ -84,7 +81,7 @@ if (resp.status == "error") {
 Regsiter new user with `phone` and `verification code`, `username`, `password` and `displayName` is optional.
 
 ```dart
-HttpResult resp = await Client.registerByPhone(
+AuthResult resp = await AuthClient.registerByPhone(
   phone,
   verifyCode,
   username: username,
@@ -98,4 +95,102 @@ if (resp.status == "error") {
   // that's ok
 }
 ```
-## License
+
+# APIs
+
+  - [Authentication APIs](#authentication-apis)
+    - [Register by username](#register-by-username)
+    - [Register by email](#register-by-email)
+    - [Register by phone](#register-by-phone)
+    - [Login by username](#login-by-username)
+    - [Login by verification code](#login-by-verification-code)
+    - [Logout](#logout)
+    - [Get Captcha](#get-captcha)
+    - [Send verification code](#send-verification-code)
+    - [Fetch current user info](#fetch-current-user-info)
+
+
+
+## Authentication APIs
+
+### Register by username
+```dart
+static Future<AuthResult> registerByUserName(
+  String username,
+  String password, {
+  String displayName = "",
+}) async
+```
+
+### Register by email
+```dart
+static Future<AuthResult> registerByEmail(
+  String email,
+  String code, {
+  String username = '',
+  String password = '',
+  String displayName = '',
+}) async
+```
+
+
+### Register by phone
+```dart
+static Future<AuthResult> registerByPhone(
+  String phone,
+  String code, {
+  String username = '',
+  String password = '',
+  String displayName = '',
+  String countryCode = "86",
+}) async
+```
+
+### Login by username
+```dart
+static Future<AuthResult> loginByUserName(
+  String username,
+  String password, {
+  bool autoSignin = false,
+}) async
+```
+
+### Login by verification code
+```dart
+static Future<AuthResult> loginByCode(
+  String phoneOrEmail,
+  String code, {
+  AccountType type = AccountType.phone,
+  bool autoSignin = false,
+  String countryCode = "86",
+}) async
+```
+
+### Logout
+```dart
+static Future<AuthResult?> logout() async
+```
+
+### Get Captcha
+```dart
+static Future<CaptchaResult> getCaptcha() async {
+```
+
+### Send verification code
+```dart
+static Future<AuthResult> sendCode(
+  String dest, {
+  AccountType? type = AccountType.phone,
+  String? checkId = "",
+  String? checkKey = "",
+  String? checkType = "none",
+  String? checkUser = "",
+}) async
+```
+
+### Fetch current user info
+```dart
+static Future<void> userInfo() async
+```
+
+# License

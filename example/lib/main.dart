@@ -172,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    log("current user: ${Client.currentUser}");
+    log("current user: ${AuthClient.currentUser}");
 
     var appbar = AppBar(
       leading: buildAppModeIcon(),
@@ -183,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     var list = <Widget>[SizedBox(height: appbar.preferredSize.height)];
 
-    if (Client.currentUser == null) {
+    if (AuthClient.currentUser == null) {
       list.add(Center(child: Unlogin(notifyParent: refresh)));
     } else {
       list.add(Center(child: LogedIn(notifyParent: refresh)));

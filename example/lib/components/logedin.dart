@@ -19,7 +19,7 @@ class _LogedInState extends State<LogedIn> {
     log("logout button pressed");
 
     try {
-      Client.logout().then((resp) {
+      AuthClient.logout().then((resp) {
         if (resp?.status == "error") {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -49,11 +49,11 @@ class _LogedInState extends State<LogedIn> {
 
   @override
   Widget build(BuildContext context) {
-    if (Client.currentUser == null) {
+    if (AuthClient.currentUser == null) {
       return Container();
     }
     ImageProvider avatar;
-    var user = Client.currentUser!;
+    var user = AuthClient.currentUser!;
     String avatarUrl = user.avatar;
     if (avatarUrl.endsWith(".svg")) {
       avatar = Svg(avatarUrl, source: SvgSource.network);
