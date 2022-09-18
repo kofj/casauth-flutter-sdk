@@ -86,6 +86,10 @@ class _LogedInState extends State<LogedIn> {
         ),
         const SizedBox(height: 20),
         ElevatedButton(
+            onPressed: () => Navigator.pushNamed(context, "/myapps"),
+            child: const Text("My Apps")),
+        const SizedBox(height: 20),
+        ElevatedButton(
           onPressed: () => logoutOnPressed(context),
           child: const Text("Logout"),
         ),

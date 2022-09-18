@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 import 'dart:ui';
-import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
 import 'package:casauth_demo/components/envinfo.dart';
 import 'package:casauth_demo/components/logedin.dart';
 import 'package:casauth_demo/components/unlogin.dart';
@@ -13,6 +13,7 @@ import 'package:casauth_demo/config.dart';
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'pages/LoginPage/log_in.dart';
+import 'pages/MyAppsPage/my_apps.dart';
 
 Config config = Config();
 Config devConfig = Config();
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
         "/": (context) => const MyHomePage(title: 'CASAuth'),
         "/login": (context) => const LoginPage(),
         "/signup": (context) => const Signup(),
+        "/myapps": (context) => const MyApps(),
       },
     );
   }
