@@ -1,8 +1,17 @@
 name: casauth
-version: "1.1.0"
+version: "1.1.1"
 homepage: https://blog.kongfanjian.com/projects/casauth-sdk.html
 repository: https://github.com/kofj/casauth-flutter-sdk
 description: A third Flutter client SDK for casdoor.
+platforms:
+  android:
+    package: com.kongfanjian.casauth
+  ios:
+    package: com.kongfanjian.casauth
+  macos:
+    package: com.kongfanjian.casauth
+  windows:
+    package: com.kongfanjian.casauth
 
 false_secrets:
   - ./hack/sql/casdoor.sql

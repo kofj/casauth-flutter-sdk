@@ -1,12 +1,13 @@
 library casauth;
 
-class HttpResult {
+class AuthResult {
   late int code;
   late String? status = "";
   late String? message = "";
   late Map<String, dynamic>? jsonBody;
+  late List<dynamic>? listBody;
 
-  HttpResult(int respCode,
+  AuthResult(int respCode,
       {String? respStatus, String? respMessage, Map<String, dynamic>? body}) {
     code = respCode;
     status = respStatus;
@@ -21,7 +22,7 @@ class CaptchaResult {
   late String? message = "";
   late CaptchaInfo? captcha;
 
-  CaptchaResult(HttpResult httpResult) {
+  CaptchaResult(AuthResult httpResult) {
     code = httpResult.code;
     status = httpResult.status;
     message = httpResult.message;

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 import 'dart:ui';
-import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
 import 'package:casauth_demo/components/envinfo.dart';
 import 'package:casauth_demo/components/logedin.dart';
 import 'package:casauth_demo/components/unlogin.dart';
@@ -13,6 +13,7 @@ import 'package:casauth_demo/config.dart';
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'pages/LoginPage/log_in.dart';
+import 'pages/MyAppsPage/my_apps.dart';
 
 Config config = Config();
 Config devConfig = Config();
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
         "/": (context) => const MyHomePage(title: 'CASAuth'),
         "/login": (context) => const LoginPage(),
         "/signup": (context) => const Signup(),
+        "/myapps": (context) => const MyApps(),
       },
     );
   }
@@ -117,13 +119,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isLogin = false;
+
   @override
   void initState() {
     super.initState();
+
     initSDK();
+    updateLoginState();
+  }
+
+  void updateLoginState() {
+    CASAuth.getToken().then((value) {
+      log("current token: ${value?.isEmpty}");
+      if (value != null && value.isNotEmpty) {
+        AuthClient.userInfo().then((v) {
+          log("user info");
+          setState(() {
+            _isLogin = true;
+          });
+        });
+      } else {
+        setState(() {
+          _isLogin = false;
+        });
+      }
+    });
   }
 
   void refresh() {
+    updateLoginState();
     setState(() {});
   }
 
@@ -172,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    log("current user: ${Client.currentUser}");
+    log("current user: ${AuthClient.currentUser}");
 
     var appbar = AppBar(
       leading: buildAppModeIcon(),
@@ -183,10 +208,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     var list = <Widget>[SizedBox(height: appbar.preferredSize.height)];
 
-    if (Client.currentUser == null) {
-      list.add(Center(child: Unlogin(notifyParent: refresh)));
-    } else {
+    if (_isLogin) {
       list.add(Center(child: LogedIn(notifyParent: refresh)));
+    } else {
+      list.add(Center(child: Unlogin(notifyParent: refresh)));
     }
     // ignore: prefer_const_constructors
     list.add(EnvInfo());

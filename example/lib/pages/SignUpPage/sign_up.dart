@@ -37,17 +37,17 @@ class _SignupState extends State<Signup> {
   Widget buildSendCode() {
     return TextButton(
       onPressed: () async {
-        HttpResult resp;
+        AuthResult resp;
         switch (accountType) {
           case AccountType.email:
-            resp = await Client.sendCode(
+            resp = await AuthClient.sendCode(
               emailController.text,
               type: accountType,
             );
             break;
 
           case AccountType.phone:
-            resp = await Client.sendCode(
+            resp = await AuthClient.sendCode(
               phoneController.text,
               type: accountType,
             );
@@ -105,17 +105,17 @@ class _SignupState extends State<Signup> {
     String phone = phoneController.text;
 
     try {
-      HttpResult resp;
+      AuthResult resp;
       switch (accountType) {
         case AccountType.username:
-          resp = await Client.registerByUserName(username, password);
+          resp = await AuthClient.registerByUserName(username, password);
           break;
         case AccountType.email:
           if (password.isEmpty) {
             password = "a$verifyCode";
             passwordController.text = password;
           }
-          resp = await Client.registerByEmail(
+          resp = await AuthClient.registerByEmail(
             email,
             verifyCode,
             username: username,
@@ -127,7 +127,7 @@ class _SignupState extends State<Signup> {
             password = "a$verifyCode";
             passwordController.text = password;
           }
-          resp = await Client.registerByPhone(
+          resp = await AuthClient.registerByPhone(
             phone,
             verifyCode,
             username: username,
@@ -146,7 +146,7 @@ class _SignupState extends State<Signup> {
           ),
         );
       } else {
-        var resp = await Client.loginByUserName(username, password);
+        var resp = await AuthClient.loginByUserName(username, password);
 
         if (resp.status == "error") {
           if (!mounted) return;
