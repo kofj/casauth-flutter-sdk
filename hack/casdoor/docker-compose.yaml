@@ -2,7 +2,7 @@ version: '3.1'
 services:
   casdoor:
     restart: always
-    image: casbin/casdoor:v1.97.0
+    image: casbin/casdoor:v1.123.0
     container_name: casdoor.server
     entrypoint: /bin/sh -c 'sleep 30 && ./server --createDatabase=true'
     ports:

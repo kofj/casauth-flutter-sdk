@@ -54,6 +54,9 @@ CREATE TABLE `application` (
   `terms_of_use` varchar(100) DEFAULT NULL,
   `signup_html` mediumtext,
   `signin_html` mediumtext,
+  `form_css` text,
+  `form_offset` int DEFAULT NULL,
+  `form_background_url` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -64,8 +67,43 @@ CREATE TABLE `application` (
 
 LOCK TABLES `application` WRITE;
 /*!40000 ALTER TABLE `application` DISABLE KEYS */;
-INSERT INTO `application` VALUES ('admin','app-built-in','2022-08-07T15:24:15Z','Casdoor','https://cdn.casbin.com/logo/logo_1024x256.png','https://casdoor.org','','built-in','cert-built-in',1,1,0,0,0,0,'[{\"name\":\"provider_captcha_default\",\"canSignUp\":false,\"canSignIn\":false,\"canUnlink\":false,\"prompted\":false,\"alertType\":\"None\",\"provider\":null}]','[{\"name\":\"ID\",\"visible\":false,\"required\":true,\"prompted\":false,\"rule\":\"Random\"},{\"name\":\"Username\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Display name\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Password\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Confirm password\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Email\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"Normal\"},{\"name\":\"Phone\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Agreement\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"}]','null','793fe6e63fd99e2707d7','de608371ce2d9ef92cea07646d625d1bf0d45c8a','[]','',168,0,'','','','','','',''),('admin','testapp','2022-08-07T23:27:44+08:00','测试应用','https://cdn.casdoor.com/logo/casdoor-logo_1185x256.png','','','dev','cert-built-in',1,1,1,1,0,0,'[{\"name\":\"provider_captcha_default\",\"canSignUp\":false,\"canSignIn\":false,\"canUnlink\":false,\"prompted\":false,\"alertType\":\"None\",\"provider\":null},{\"name\":\"mocksms\",\"canSignUp\":true,\"canSignIn\":true,\"canUnlink\":true,\"prompted\":false,\"alertType\":\"None\",\"provider\":null},{\"name\":\"mockmail\",\"canSignUp\":true,\"canSignIn\":true,\"canUnlink\":true,\"prompted\":false,\"alertType\":\"None\",\"provider\":null}]','[{\"name\":\"ID\",\"visible\":false,\"required\":true,\"prompted\":false,\"rule\":\"Random\"},{\"name\":\"Username\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Display name\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Password\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Confirm password\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Email\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"Normal\"},{\"name\":\"Phone\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Agreement\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"}]','[\"authorization_code\",\"password\",\"token\",\"id_token\",\"refresh_token\"]','dc4b4df2fcfa9d2ef765','e895642459c716cf4b969ae197a023e330e8a31a','[\"http://localhost:8000/\"]','JWT',168,0,'','','','','','','');
+INSERT INTO `application` VALUES ('admin','app-built-in','2022-08-07T15:24:15Z','Casdoor','https://cdn.casbin.com/logo/logo_1024x256.png','https://casdoor.org','','built-in','cert-built-in',1,1,0,0,0,0,'[{\"name\":\"provider_captcha_default\",\"canSignUp\":false,\"canSignIn\":false,\"canUnlink\":false,\"prompted\":false,\"alertType\":\"None\",\"provider\":null}]','[{\"name\":\"ID\",\"visible\":false,\"required\":true,\"prompted\":false,\"rule\":\"Random\"},{\"name\":\"Username\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Display name\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Password\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Confirm password\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Email\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"Normal\"},{\"name\":\"Phone\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Agreement\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"}]','null','793fe6e63fd99e2707d7','de608371ce2d9ef92cea07646d625d1bf0d45c8a','[]','',168,0,'','','','','','','',NULL,NULL,NULL),('admin','testapp','2022-08-07T23:27:44+08:00','测试应用','https://cdn.casdoor.com/logo/casdoor-logo_1185x256.png','','','dev','cert-built-in',1,1,1,1,0,0,'[{\"name\":\"provider_captcha_default\",\"canSignUp\":false,\"canSignIn\":false,\"canUnlink\":false,\"prompted\":false,\"alertType\":\"None\",\"provider\":null},{\"name\":\"mocksms\",\"canSignUp\":true,\"canSignIn\":true,\"canUnlink\":true,\"prompted\":false,\"alertType\":\"None\",\"provider\":null},{\"name\":\"mockmail\",\"canSignUp\":true,\"canSignIn\":true,\"canUnlink\":true,\"prompted\":false,\"alertType\":\"None\",\"provider\":null}]','[{\"name\":\"ID\",\"visible\":false,\"required\":true,\"prompted\":false,\"rule\":\"Random\"},{\"name\":\"Username\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Display name\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Password\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Confirm password\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Email\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"Normal\"},{\"name\":\"Phone\",\"visible\":true,\"required\":false,\"prompted\":false,\"rule\":\"None\"},{\"name\":\"Agreement\",\"visible\":true,\"required\":true,\"prompted\":false,\"rule\":\"None\"}]','[\"authorization_code\",\"password\",\"token\",\"id_token\",\"refresh_token\"]','dc4b4df2fcfa9d2ef765','e895642459c716cf4b969ae197a023e330e8a31a','[\"http://localhost:8000/\"]','JWT',168,0,'','','','','','','',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `application` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `casbin_adapter`
+--
+
+DROP TABLE IF EXISTS `casbin_adapter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `casbin_adapter` (
+  `owner` varchar(100) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_time` varchar(100) DEFAULT NULL,
+  `organization` varchar(100) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
+  `model` varchar(100) DEFAULT NULL,
+  `host` varchar(100) DEFAULT NULL,
+  `port` int DEFAULT NULL,
+  `user` varchar(100) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `database_type` varchar(100) DEFAULT NULL,
+  `database` varchar(100) DEFAULT NULL,
+  `table` varchar(100) DEFAULT NULL,
+  `is_enabled` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`owner`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `casbin_adapter`
+--
+
+LOCK TABLES `casbin_adapter` WRITE;
+/*!40000 ALTER TABLE `casbin_adapter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `casbin_adapter` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -83,13 +121,13 @@ CREATE TABLE `casbin_rule` (
   `v3` varchar(100) NOT NULL DEFAULT '',
   `v4` varchar(100) NOT NULL DEFAULT '',
   `v5` varchar(100) NOT NULL DEFAULT '',
-  KEY `IDX_casbin_rule_v1` (`v1`),
   KEY `IDX_casbin_rule_v2` (`v2`),
   KEY `IDX_casbin_rule_v3` (`v3`),
   KEY `IDX_casbin_rule_v4` (`v4`),
   KEY `IDX_casbin_rule_v5` (`v5`),
   KEY `IDX_casbin_rule_p_type` (`p_type`),
-  KEY `IDX_casbin_rule_v0` (`v0`)
+  KEY `IDX_casbin_rule_v0` (`v0`),
+  KEY `IDX_casbin_rule_v1` (`v1`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -99,7 +137,7 @@ CREATE TABLE `casbin_rule` (
 
 LOCK TABLES `casbin_rule` WRITE;
 /*!40000 ALTER TABLE `casbin_rule` DISABLE KEYS */;
-INSERT INTO `casbin_rule` VALUES ('p','built-in','*','*','*','*','*'),('p','app','*','*','*','*','*'),('p','*','*','POST','/api/signup','*','*'),('p','*','*','POST','/api/get-email-and-phone','*','*'),('p','*','*','POST','/api/login','*','*'),('p','*','*','GET','/api/get-app-login','*','*'),('p','*','*','POST','/api/logout','*','*'),('p','*','*','GET','/api/logout','*','*'),('p','*','*','GET','/api/get-account','*','*'),('p','*','*','GET','/api/userinfo','*','*'),('p','*','*','*','/api/login/oauth','*','*'),('p','*','*','GET','/api/get-application','*','*'),('p','*','*','GET','/api/get-applications','*','*'),('p','*','*','GET','/api/get-user','*','*'),('p','*','*','GET','/api/get-user-application','*','*'),('p','*','*','GET','/api/get-resources','*','*'),('p','*','*','GET','/api/get-product','*','*'),('p','*','*','POST','/api/buy-product','*','*'),('p','*','*','GET','/api/get-payment','*','*'),('p','*','*','POST','/api/update-payment','*','*'),('p','*','*','POST','/api/invoice-payment','*','*'),('p','*','*','GET','/api/get-providers','*','*'),('p','*','*','POST','/api/notify-payment','*','*'),('p','*','*','POST','/api/unlink','*','*'),('p','*','*','POST','/api/set-password','*','*'),('p','*','*','POST','/api/send-verification-code','*','*'),('p','*','*','GET','/api/get-captcha','*','*'),('p','*','*','POST','/api/verify-captcha','*','*'),('p','*','*','POST','/api/reset-email-or-phone','*','*'),('p','*','*','POST','/api/upload-resource','*','*'),('p','*','*','GET','/.well-known/openid-configuration','*','*'),('p','*','*','*','/.well-known/jwks','*','*'),('p','*','*','GET','/api/get-saml-login','*','*'),('p','*','*','POST','/api/acs','*','*'),('p','*','*','GET','/api/saml/metadata','*','*'),('p','*','*','*','/cas','*','*'),('p','*','*','*','/api/webauthn','*','*');
+INSERT INTO `casbin_rule` VALUES ('p','built-in','*','*','*','*','*'),('p','app','*','*','*','*','*'),('p','*','*','POST','/api/signup','*','*'),('p','*','*','POST','/api/get-email-and-phone','*','*'),('p','*','*','POST','/api/login','*','*'),('p','*','*','GET','/api/get-app-login','*','*'),('p','*','*','POST','/api/logout','*','*'),('p','*','*','GET','/api/logout','*','*'),('p','*','*','GET','/api/get-account','*','*'),('p','*','*','GET','/api/userinfo','*','*'),('p','*','*','*','/api/login/oauth','*','*'),('p','*','*','GET','/api/get-application','*','*'),('p','*','*','GET','/api/get-organization-applications','*','*'),('p','*','*','GET','/api/get-user','*','*'),('p','*','*','GET','/api/get-user-application','*','*'),('p','*','*','GET','/api/get-resources','*','*'),('p','*','*','GET','/api/get-records','*','*'),('p','*','*','GET','/api/get-product','*','*'),('p','*','*','POST','/api/buy-product','*','*'),('p','*','*','GET','/api/get-payment','*','*'),('p','*','*','POST','/api/update-payment','*','*'),('p','*','*','POST','/api/invoice-payment','*','*'),('p','*','*','POST','/api/notify-payment','*','*'),('p','*','*','POST','/api/unlink','*','*'),('p','*','*','POST','/api/set-password','*','*'),('p','*','*','POST','/api/send-verification-code','*','*'),('p','*','*','GET','/api/get-captcha','*','*'),('p','*','*','POST','/api/verify-captcha','*','*'),('p','*','*','POST','/api/reset-email-or-phone','*','*'),('p','*','*','POST','/api/upload-resource','*','*'),('p','*','*','GET','/.well-known/openid-configuration','*','*'),('p','*','*','*','/.well-known/jwks','*','*'),('p','*','*','GET','/api/get-saml-login','*','*'),('p','*','*','POST','/api/acs','*','*'),('p','*','*','GET','/api/saml/metadata','*','*'),('p','*','*','*','/cas','*','*'),('p','*','*','*','/api/webauthn','*','*'),('p','*','*','GET','/api/get-release','*','*'),('p','*','*','GET','/api/get-default-application','*','*');
 /*!40000 ALTER TABLE `casbin_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -221,7 +259,8 @@ CREATE TABLE `organization` (
   `master_password` varchar(100) DEFAULT NULL,
   `enable_soft_deletion` tinyint(1) DEFAULT NULL,
   `is_profile_public` tinyint(1) DEFAULT NULL,
-  `account_items` varchar(2000) DEFAULT NULL,
+  `account_items` varchar(3000) DEFAULT NULL,
+  `default_application` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -232,7 +271,7 @@ CREATE TABLE `organization` (
 
 LOCK TABLES `organization` WRITE;
 /*!40000 ALTER TABLE `organization` DISABLE KEYS */;
-INSERT INTO `organization` VALUES ('admin','built-in','2022-08-07T15:24:15Z','Built-in Organization','https://example.com','https://cdn.casbin.com/static/favicon.ico','plain','','86','https://casbin.org/img/casbin.svg','[]','',0,0,'[{\"name\":\"Organization\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"ID\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Display name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Avatar\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"User type\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Password\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Email\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Phone\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Country/Region\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Location\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Affiliation\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Title\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Homepage\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Bio\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Tag\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Signup application\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Roles\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Permissions\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"3rd-party logins\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Properties\",\"visible\":false,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is global admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is forbidden\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is deleted\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"WebAuthn credentials\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"}]'),('admin','dev','2022-08-07T23:28:07+08:00','测试环境','https://door.casdoor.com','https://cdn.casdoor.com/static/favicon.png','bcrypt','','86','https://casbin.org/img/casbin.svg','[]','',0,1,'[{\"name\":\"Organization\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"ID\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Display name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Avatar\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"User type\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Password\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Email\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Phone\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Country/Region\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Location\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Affiliation\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Title\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Homepage\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Bio\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Tag\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Signup application\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Roles\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Permissions\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"3rd-party logins\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Properties\",\"visible\":false,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is global admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is forbidden\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is deleted\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"}]');
+INSERT INTO `organization` VALUES ('admin','built-in','2022-08-07T15:24:15Z','Built-in Organization','https://example.com','https://cdn.casbin.com/static/favicon.ico','plain','','86','https://casbin.org/img/casbin.svg','[]','',0,0,'[{\"name\":\"Organization\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"ID\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Display name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Avatar\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"User type\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Password\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Email\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Phone\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Country/Region\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Location\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Affiliation\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Title\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Homepage\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Bio\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Tag\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Signup application\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Roles\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Permissions\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"3rd-party logins\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Properties\",\"visible\":false,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is global admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is forbidden\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is deleted\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"WebAuthn credentials\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"}]',NULL),('admin','dev','2022-08-07T23:28:07+08:00','测试环境','https://door.casdoor.com','https://cdn.casdoor.com/static/favicon.png','bcrypt','','86','https://casbin.org/img/casbin.svg','[]','',0,1,'[{\"name\":\"Organization\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"ID\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Display name\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Avatar\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"User type\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Password\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Email\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Phone\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Country/Region\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Location\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Affiliation\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Title\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Homepage\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Bio\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Self\"},{\"name\":\"Tag\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Signup application\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Admin\"},{\"name\":\"Roles\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"Permissions\",\"visible\":true,\"viewRule\":\"Public\",\"modifyRule\":\"Immutable\"},{\"name\":\"3rd-party logins\",\"visible\":true,\"viewRule\":\"Self\",\"modifyRule\":\"Self\"},{\"name\":\"Properties\",\"visible\":false,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is global admin\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is forbidden\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"},{\"name\":\"Is deleted\",\"visible\":true,\"viewRule\":\"Admin\",\"modifyRule\":\"Admin\"}]',NULL);
 /*!40000 ALTER TABLE `organization` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -304,6 +343,12 @@ CREATE TABLE `permission` (
   `actions` mediumtext,
   `effect` varchar(100) DEFAULT NULL,
   `is_enabled` tinyint(1) DEFAULT NULL,
+  `domains` mediumtext,
+  `adapter` varchar(100) DEFAULT NULL,
+  `submitter` varchar(100) DEFAULT NULL,
+  `approver` varchar(100) DEFAULT NULL,
+  `approve_time` varchar(100) DEFAULT NULL,
+  `state` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -314,7 +359,7 @@ CREATE TABLE `permission` (
 
 LOCK TABLES `permission` WRITE;
 /*!40000 ALTER TABLE `permission` DISABLE KEYS */;
-INSERT INTO `permission` VALUES ('built-in','permission-built-in','2022-08-07T15:24:15Z','Built-in Permission','[\"built-in/admin\"]','[]','','Application','[\"app-built-in\"]','[\"Read\",\"Write\",\"Admin\"]','Allow',1),('dev','permission_ocrwoi','2022-08-07T23:37:02+08:00','测试权限 ocrwoi','[]','[]','model_ay09l6','Application','[\"testapp\"]','[\"Read\"]','Allow',1);
+INSERT INTO `permission` VALUES ('built-in','permission-built-in','2022-08-07T15:24:15Z','Built-in Permission','[\"built-in/admin\"]','[]','','Application','[\"app-built-in\"]','[\"Read\",\"Write\",\"Admin\"]','Allow',1,NULL,NULL,NULL,NULL,NULL,NULL),('dev','permission_ocrwoi','2022-08-07T23:37:02+08:00','测试权限 ocrwoi','[]','[]','model_ay09l6','Application','[\"testapp\"]','[\"Read\"]','Allow',1,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -333,13 +378,16 @@ CREATE TABLE `permission_rule` (
   `v3` varchar(100) NOT NULL DEFAULT '',
   `v4` varchar(100) NOT NULL DEFAULT '',
   `v5` varchar(100) NOT NULL DEFAULT '',
-  KEY `IDX_permission_rule_p_type` (`p_type`),
+  `ptype` varchar(100) NOT NULL DEFAULT '',
+  `id` varchar(100) NOT NULL DEFAULT '',
   KEY `IDX_permission_rule_v0` (`v0`),
   KEY `IDX_permission_rule_v1` (`v1`),
   KEY `IDX_permission_rule_v2` (`v2`),
   KEY `IDX_permission_rule_v3` (`v3`),
   KEY `IDX_permission_rule_v4` (`v4`),
-  KEY `IDX_permission_rule_v5` (`v5`)
+  KEY `IDX_permission_rule_v5` (`v5`),
+  KEY `IDX_permission_rule_id` (`id`),
+  KEY `IDX_permission_rule_ptype` (`ptype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -349,7 +397,7 @@ CREATE TABLE `permission_rule` (
 
 LOCK TABLES `permission_rule` WRITE;
 /*!40000 ALTER TABLE `permission_rule` DISABLE KEYS */;
-INSERT INTO `permission_rule` VALUES ('p','built-in/admin','app-built-in','read','','',''),('p','built-in/admin','app-built-in','write','','',''),('p','built-in/admin','app-built-in','admin','','','');
+INSERT INTO `permission_rule` VALUES ('p','built-in/admin','app-built-in','read','','','','',''),('p','built-in/admin','app-built-in','write','','','','',''),('p','built-in/admin','app-built-in','admin','','','','','');
 /*!40000 ALTER TABLE `permission_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -431,6 +479,8 @@ CREATE TABLE `provider` (
   `issuer_url` varchar(100) DEFAULT NULL,
   `enable_sign_authn_request` tinyint(1) DEFAULT NULL,
   `provider_url` varchar(200) DEFAULT NULL,
+  `disable_ssl` tinyint(1) DEFAULT NULL,
+  `receiver` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -441,7 +491,7 @@ CREATE TABLE `provider` (
 
 LOCK TABLES `provider` WRITE;
 /*!40000 ALTER TABLE `provider` DISABLE KEYS */;
-INSERT INTO `provider` VALUES ('admin','mockmail','2022-08-13T12:26:59+08:00','模拟邮件','Email','Default','','Normal','test@mailhog.example','','','','','','','','','','localhost',1025,'Code','verification code: %s, please enter in 5 minutes.','','','','','','','','','','','',0,''),('admin','provider_captcha_default','2022-08-07T15:24:15Z','Captcha Default','Captcha','','','','','','','','','','','','','','',0,'','','','','','','','','','','','','',0,''),('admin','mocksms','2022-08-10T18:25:17+08:00','模拟短信','SMS','Mock SMS','','Normal','ak','sk','','','','','','','','','',0,'','','','sign','124','abc','','','','','','','',0,'https://github.com/organizations/xxx/settings/applications/1234567');
+INSERT INTO `provider` VALUES ('admin','mockmail','2022-08-13T12:26:59+08:00','模拟邮件','Email','Default','','Normal','test@mailhog.example','','','','','','','','','','localhost',1025,'Code','verification code: %s, please enter in 5 minutes.','','','','','','','','','','','',0,'',1,NULL),('admin','mocksms','2022-08-10T18:25:17+08:00','模拟短信','SMS','Mock SMS','','Normal','ak','sk','','','','','','','','','',0,'','','','sign','124','abc','','','','','','','',0,'https://github.com/organizations/xxx/settings/applications/1234567',NULL,NULL),('admin','provider_captcha_default','2022-08-07T15:24:15Z','Captcha Default','Captcha','','','','','','','','','','','','','','',0,'','','','','','','','','','','','','',0,'',NULL,NULL);
 /*!40000 ALTER TABLE `provider` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -529,6 +579,7 @@ CREATE TABLE `role` (
   `users` mediumtext,
   `roles` mediumtext,
   `is_enabled` tinyint(1) DEFAULT NULL,
+  `domains` mediumtext,
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -702,6 +753,9 @@ CREATE TABLE `user` (
   `properties` text,
   `roles` text,
   `permissions` text,
+  `last_signin_wrong_time` varchar(100) DEFAULT NULL,
+  `signin_wrong_times` int DEFAULT NULL,
+  `managedAccounts` blob,
   PRIMARY KEY (`owner`,`name`),
   KEY `IDX_user_id` (`id`),
   KEY `IDX_user_email` (`email`),
@@ -716,7 +770,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('built-in','admin','2022-08-07T15:24:15Z','','9625cac0-e6ca-4f3b-b49e-69f8e68710ff','normal-user','123','','Admin','','','https://casbin.org/img/casbin.svg','','admin@example.com',0,'12345678910','','[]','Example Inc.','','','','','','staff','','','','','',2000,0,1,0,0,1,1,0,0,'app-built-in','','','127.0.0.1','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','','{}','null','null'),('dev','user_m11zjg','2022-08-07T23:32:36+08:00','','d94f7c1a-6dcc-451d-9be8-0047d6b9c63f','normal-user','$2a$10$JFzWcewkbxzuZVo5lebkm.xsFZWkkq/cgbAmH3iyhJ94homYd/gu.','','测试用户m11zjg','','','https://casbin.org/img/casbin.svg','','m11zjg@example.com',0,'27327567959','','[]','Example Inc.','','','','','','staff','','','','','',0,0,2,0,0,0,0,0,0,'testapp','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','','{}','null','null');
+INSERT INTO `user` VALUES ('built-in','admin','2022-08-07T15:24:15Z','','9625cac0-e6ca-4f3b-b49e-69f8e68710ff','normal-user','123','','Admin','','','https://casbin.org/img/casbin.svg','','admin@example.com',0,'12345678910','','[]','Example Inc.','','','','','','staff','','','','','',2000,0,1,0,0,1,1,0,0,'app-built-in','','','127.0.0.1','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','','{}','null','null',NULL,NULL,NULL),('dev','user_m11zjg','2022-08-07T23:32:36+08:00','','d94f7c1a-6dcc-451d-9be8-0047d6b9c63f','normal-user','$2a$10$JFzWcewkbxzuZVo5lebkm.xsFZWkkq/cgbAmH3iyhJ94homYd/gu.','','测试用户m11zjg','','','https://casbin.org/img/casbin.svg','','m11zjg@example.com',0,'27327567959','','[]','Example Inc.','','','','','','staff','','','','','',0,0,2,0,0,0,0,0,0,'testapp','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','','{}','null','null',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -794,4 +848,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-08-13  6:42:20
+-- Dump completed on 2022-12-07  5:08:43
