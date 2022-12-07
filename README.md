@@ -17,6 +17,7 @@ You need install self's casdoor first. And I only test this SDK with a little ve
 | CASAuth Version | Casdoor Version | Tested |
 |---|---|---|
 | v1.1.0 | v1.97.0 | ✅ |
+| v1.1.0 | v1.123.0 | ✅ |
 
 
 ## Usage
