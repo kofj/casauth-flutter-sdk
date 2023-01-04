@@ -40,6 +40,10 @@ class _EnvInfoState extends State<EnvInfo> {
             padding(const Text("CAS Org Name")),
             padding(Text(CASAuth.organization)),
           ]),
+          TableRow(children: [
+            padding(const Text("Token")),
+            padding(Text(CASAuth.token ?? "")),
+          ]),
         ],
       );
     } else {

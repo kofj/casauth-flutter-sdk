@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:casauth/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mysql_client/mysql_client.dart';
@@ -23,6 +24,8 @@ void main() async {
   CASAuth(appName, appId, server, orgnazationName);
 
   String password = "hUQxzNTPw7IL"; // user password for all test cases
+
+  await CASAuth.init();
 
   test('test config', () async {
     var cfg = CASAuth.config;
@@ -196,15 +199,17 @@ void main() async {
     test("Login with username and password", () async {
       AuthResult resp = await AuthClient.loginByUserName(username, password);
       expect(resp.code, 200);
-      expect(AuthClient.currentUser, isNotNull);
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(AuthClient.currentUser?.id, isNotEmpty);
-      expect(AuthClient.currentUser?.name, username);
-      expect(AuthClient.currentUser?.avatar, isNotEmpty);
-      expect(AuthClient.currentUser?.owner, orgnazationName);
-      expect(AuthClient.currentUser?.signupApplication, appName);
-      expect(AuthClient.currentUser?.score, 2000);
-      expect(AuthClient.currentUser?.ranking, greaterThan(1));
+
+      User? user = await CASAuth.getCurrentUser();
+      expect(user, isNotNull);
+      expect(user?.id, isNotEmpty);
+      expect(user?.name, username);
+      expect(user?.avatar, isNotEmpty);
+      expect(user?.owner, orgnazationName);
+      expect(user?.signupApplication, appName);
+      expect(user?.score, 2000);
+      expect(user?.ranking, greaterThan(1));
 
       expect(resp.status, "ok", reason: "raw resp: $resp");
 
@@ -219,8 +224,9 @@ void main() async {
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      expect(AuthClient.currentUser, null,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
+      User? user = await CASAuth.getCurrentUser();
+
+      expect(user, null, reason: "currentUser: ${jsonEncode(user)}");
     });
 
     test("Login with username that not exists", () async {
@@ -231,8 +237,9 @@ void main() async {
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      expect(AuthClient.currentUser, null,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
+      User? user = await CASAuth.getCurrentUser();
+
+      expect(user, null, reason: "currentUser: ${jsonEncode(user)}");
     });
   });
 
@@ -267,22 +274,21 @@ void main() async {
 
     test("Login with phone and password", () async {
       AuthResult resp = await AuthClient.loginByUserName(phone, password);
-
-      debugPrint(
-          "--== logined ==--\n${jsonEncode(AuthClient.currentUser)}\n\n");
       expect(resp.code, 200);
-      expect(AuthClient.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
       expect(resp.jsonBody?["data"], isNotNull);
-      expect(AuthClient.currentUser?.phone, phone);
-      expect(AuthClient.currentUser?.id, isNotEmpty);
-      expect(AuthClient.currentUser?.avatar, isNotEmpty);
-      expect(AuthClient.currentUser?.owner, orgnazationName);
-      expect(AuthClient.currentUser?.signupApplication, appName);
-      expect(AuthClient.currentUser?.score, 2000);
-      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      User? user = await CASAuth.getCurrentUser();
+      debugPrint("--== logined ==--\n${jsonEncode(user)}\n\n");
+      expect(user, isNotNull, reason: "currentUser: ${jsonEncode(user)}");
+      expect(user?.phone, phone);
+      expect(user?.id, isNotEmpty);
+      expect(user?.avatar, isNotEmpty);
+      expect(user?.owner, orgnazationName);
+      expect(user?.signupApplication, appName);
+      expect(user?.score, 2000);
+      expect(user?.ranking, greaterThan(1));
 
       await cleanVerificationRecordAddr();
       await AuthClient.logout();
@@ -304,18 +310,19 @@ void main() async {
 
       AuthResult resp = await AuthClient.loginByCode(phone, code);
       expect(resp.code, 200);
-      expect(AuthClient.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
-      expect(resp.jsonBody?["data"], isNotNull);
-      expect(AuthClient.currentUser?.phone, phone);
-      expect(AuthClient.currentUser?.id, isNotEmpty);
-      expect(AuthClient.currentUser?.avatar, isNotEmpty);
-      expect(AuthClient.currentUser?.owner, orgnazationName);
-      expect(AuthClient.currentUser?.signupApplication, appName);
-      expect(AuthClient.currentUser?.score, 2000);
-      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      User? user = await CASAuth.getCurrentUser();
+      expect(user, isNotNull, reason: "currentUser: ${jsonEncode(user)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(user?.phone, phone);
+      expect(user?.id, isNotEmpty);
+      expect(user?.avatar, isNotEmpty);
+      expect(user?.owner, orgnazationName);
+      expect(user?.signupApplication, appName);
+      expect(user?.score, 2000);
+      expect(user?.ranking, greaterThan(1));
 
       // clean
       await cleanVerificationRecordAddr();
@@ -355,22 +362,21 @@ void main() async {
 
     test("Login with email and password", () async {
       AuthResult resp = await AuthClient.loginByUserName(email, password);
-
-      debugPrint(
-          "--== logined ==--\n${jsonEncode(AuthClient.currentUser)}\n\n");
       expect(resp.code, 200);
-      expect(AuthClient.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
-      expect(resp.jsonBody?["data"], isNotNull);
-      expect(AuthClient.currentUser?.email, email);
-      expect(AuthClient.currentUser?.id, isNotEmpty);
-      expect(AuthClient.currentUser?.avatar, isNotEmpty);
-      expect(AuthClient.currentUser?.owner, orgnazationName);
-      expect(AuthClient.currentUser?.signupApplication, appName);
-      expect(AuthClient.currentUser?.score, 2000);
-      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      User? user = await CASAuth.getCurrentUser();
+      debugPrint("--== logined ==--\n${jsonEncode(user)}\n\n");
+      expect(user, isNotNull, reason: "currentUser: ${jsonEncode(user)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(user?.email, email);
+      expect(user?.id, isNotEmpty);
+      expect(user?.avatar, isNotEmpty);
+      expect(user?.owner, orgnazationName);
+      expect(user?.signupApplication, appName);
+      expect(user?.score, 2000);
+      expect(user?.ranking, greaterThan(1));
 
       await cleanVerificationRecordAddr();
       await AuthClient.logout();
@@ -393,18 +399,19 @@ void main() async {
       AuthResult resp =
           await AuthClient.loginByCode(email, code, type: AccountType.email);
       expect(resp.code, 200);
-      expect(AuthClient.currentUser, isNotNull,
-          reason: "currentUser: ${jsonEncode(AuthClient.currentUser)}");
-      expect(resp.jsonBody?["data"], isNotNull);
-      expect(AuthClient.currentUser?.email, email);
-      expect(AuthClient.currentUser?.id, isNotEmpty);
-      expect(AuthClient.currentUser?.avatar, isNotEmpty);
-      expect(AuthClient.currentUser?.owner, orgnazationName);
-      expect(AuthClient.currentUser?.signupApplication, appName);
-      expect(AuthClient.currentUser?.score, 2000);
-      expect(AuthClient.currentUser?.ranking, greaterThan(1));
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+
+      User? user = await CASAuth.getCurrentUser();
+      expect(user, isNotNull, reason: "currentUser: ${jsonEncode(user)}");
+      expect(resp.jsonBody?["data"], isNotNull);
+      expect(user?.email, email);
+      expect(user?.id, isNotEmpty);
+      expect(user?.avatar, isNotEmpty);
+      expect(user?.owner, orgnazationName);
+      expect(user?.signupApplication, appName);
+      expect(user?.score, 2000);
+      expect(user?.ranking, greaterThan(1));
 
       // clean
       await cleanVerificationRecordAddr();

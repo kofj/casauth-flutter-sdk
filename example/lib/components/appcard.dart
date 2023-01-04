@@ -56,7 +56,8 @@ class AppCard extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 200,
+            padding: const EdgeInsets.fromLTRB(5, 15, 5, 10),
+            height: 180,
             width: double.infinity,
             color: Colors.white70,
             child: CachedNetworkImage(
@@ -65,7 +66,6 @@ class AppCard extends StatelessWidget {
             ),
           ),
           ListTile(
-            // leading: const Icon(Icons.album),
             title: Text("${app.appName} / ${app.displayName}"),
             subtitle:
                 Text("AppId: ${app.appId}\nDescription: ${app.description}"),
