@@ -11,7 +11,6 @@ import 'package:casauth_demo/components/logedin.dart';
 import 'package:casauth_demo/components/unlogin.dart';
 import 'package:casauth_demo/config.dart';
 import 'package:casauth/casauth.dart';
-import 'package:casauth/client.dart';
 import 'pages/LoginPage/log_in.dart';
 import 'pages/MyAppsPage/my_apps.dart';
 
@@ -46,6 +45,8 @@ void main() async {
     exit(1);
   }
 
+  await initSDK();
+
   runZonedGuarded<Future<void>>(
     () async {
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -73,7 +74,7 @@ Future<Config> loadConfigFromDotEnv(String file) async {
   return config;
 }
 
-void initSDK() {
+Future<void> initSDK() async {
   try {
     log("init casauth SDK: ${config.server}, ${config.appId}, ${config.appName}, ${config.orgnazationName}");
     CASAuth(
@@ -82,6 +83,7 @@ void initSDK() {
       config.server,
       config.orgnazationName,
     );
+    await CASAuth.init();
   } catch (e) {
     log("init casauth SDK failed: $e");
   }
@@ -119,39 +121,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _isLogin = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    initSDK();
-    updateLoginState();
-  }
-
-  void updateLoginState() {
-    CASAuth.getToken().then((value) {
-      log("current token: ${value?.isEmpty}");
-      if (value != null && value.isNotEmpty) {
-        AuthClient.userInfo().then((v) {
-          log("user info");
-          setState(() {
-            _isLogin = true;
-          });
-        });
-      } else {
-        setState(() {
-          _isLogin = false;
-        });
-      }
-    });
-  }
-
-  void refresh() {
-    updateLoginState();
-    setState(() {});
-  }
-
   void showChangeCfgDialog(BuildContext context) {
     showDialog(
         context: context,
@@ -195,10 +164,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void refresh() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    log("current user: ${AuthClient.currentUser}");
-
     var appbar = AppBar(
       leading: buildAppModeIcon(),
       title: InkWell(
@@ -208,11 +179,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     var list = <Widget>[SizedBox(height: appbar.preferredSize.height)];
 
-    if (_isLogin) {
+    log("token length: ${CASAuth.token?.length}");
+    if (CASAuth.isLogin) {
       list.add(Center(child: LogedIn(notifyParent: refresh)));
     } else {
       list.add(Center(child: Unlogin(notifyParent: refresh)));
     }
+
     // ignore: prefer_const_constructors
     list.add(EnvInfo());
 

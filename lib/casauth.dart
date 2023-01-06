@@ -1,11 +1,18 @@
 library casauth;
 
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:casauth/client.dart';
+import 'package:casauth/user.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config.dart';
 
 class CASAuth {
+  static SharedPreferences? _prefs;
   static const String version = "1.1.0";
 
   static String app = "";
@@ -26,10 +33,10 @@ class CASAuth {
     if (userPrefix != null) {
       randomUsernamePrefix = userPrefix;
     }
-    init();
   }
 
   static Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
     await requestApplicationConfig();
   }
 
@@ -46,6 +53,7 @@ class CASAuth {
 
     http.Response? resp = await http.get(url, headers: headers);
     if (resp.statusCode != 200) {
+      log("init config failed: code=${resp.statusCode}/body=${resp.body}");
       throw Exception(
           "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
     }
@@ -57,19 +65,43 @@ class CASAuth {
     }
   }
 
-  static Future<bool> setToken(String token) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString(keyToken, token);
+  static bool get isLogin {
+    log("isLogin: token=${token?.isNotEmpty}");
+    return token != null;
   }
 
-  static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(keyToken);
+  static String? get token {
+    return _prefs?.getString(keyToken);
   }
 
-  static Future<bool> rmToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.remove(keyToken);
+  static set token(String? token) {
+    if (token != null) _prefs?.setString(keyToken, token);
+  }
+
+  // clear cache in local storage
+  static Future<bool>? clearCache() {
+    debugPrint("🕹 clearCache");
+    return _prefs?.clear();
+  }
+
+  static _keyCurrentUser() {
+    return "$organization.current.user}";
+  }
+
+  static set currentUser(User? user) {
+    _prefs?.setString(_keyCurrentUser(), jsonEncode(user)).then((ok) {
+      debugPrint("set currentUser $ok");
+    });
+  }
+
+  static Future<User?> getCurrentUser() async {
+    String? cache = _prefs?.getString(_keyCurrentUser());
+    if (cache != null) {
+      Map<String, dynamic> json = jsonDecode(cache);
+      return User.fromJson(json);
+    }
+
+    return AuthClient.userInfo();
   }
 }
 

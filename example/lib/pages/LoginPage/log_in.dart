@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:casauth_demo/utils/cacheimage.dart';
@@ -82,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                   try {
                     AuthClient.loginByUserName(username, password).then((resp) {
                       if (resp.status == "error") {
+                        log("❌ login failed, error: ${resp.message}, body: ${resp.jsonBody}");
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: Colors.red,
@@ -89,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                                 "login failed, error: ${resp.message}, body: ${resp.jsonBody}"),
                           ),
                         );
+                        Navigator.pop(context, false);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -96,7 +100,8 @@ class _LoginPageState extends State<LoginPage> {
                             content: Text("Login Success"),
                           ),
                         );
-                        Navigator.pop(context, resp.jsonBody);
+                        log("login success, body: ${resp.jsonBody?.isNotEmpty}");
+                        Navigator.pop(context, true);
                       }
                     });
                   } catch (e) {

@@ -12,29 +12,19 @@ class MyApps extends StatefulWidget {
 }
 
 class _MyAppsState extends State<MyApps> {
-  List<CasdoorApp> apps = [];
-
-  @override
-  void initState() {
-    super.initState();
-
-    fetchApps();
-  }
-
-  fetchApps() async {
+  Future<List<CasdoorApp>> fetchApps() async {
     var endpoint =
         "/api/get-organization-applications?owner=admin&organization=${CASAuth.organization}";
     AuthResult resp = await AuthClient.get(endpoint);
 
     if (resp.code == 200 && resp.listBody != null) {
-      apps.addAll(resp.listBody!.map((e) => CasdoorApp.fromJson(e)).toList());
+      return resp.listBody!.map((e) => CasdoorApp.fromJson(e)).toList();
     }
 
-    setState(() {});
+    return [];
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildAppList(List<CasdoorApp> apps) {
     List<Widget> list = [];
     for (var app in apps) {
       var appCard = Padding(
@@ -61,6 +51,26 @@ class _MyAppsState extends State<MyApps> {
       body: SingleChildScrollView(
         child: Column(children: list),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<CasdoorApp>>(
+      future: fetchApps(),
+      builder: (context, ss) {
+        if (ss.connectionState == ConnectionState.done && ss.hasData) {
+          return _buildAppList(ss.data!);
+        } else if (ss.hasError) {
+          return Center(child: Text("${ss.error}"));
+        }
+        return const Center(
+          child: CircularProgressIndicator(
+            semanticsLabel: "Loading...",
+            semanticsValue: "Loading",
+          ),
+        );
+      },
     );
   }
 }

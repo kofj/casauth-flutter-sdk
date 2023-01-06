@@ -11,10 +11,7 @@ import 'package:casauth/result.dart';
 import 'package:casauth/user.dart';
 
 class AuthClient {
-  static User? currentUser;
-  static String? token;
-
-// register a new user by username and password
+  // register a new user by username and password
   static Future<AuthResult> registerByUserName(
     String username,
     String password, {
@@ -60,13 +57,17 @@ class AuthClient {
       'type': CASAuth.config.getGrantTokenType(),
     });
 
-    AuthResult resp = await post('/api/login', payload);
-    token = resp.jsonBody?['data'];
-    currentUser = null;
-    if (resp.code == 200 && token != null && token!.isNotEmpty) {
-      await CASAuth.setToken(token!);
-      await userInfo();
+    if (CASAuth.token != null) {
+      log("token is not empty, logout before login");
+      await logout();
     }
+
+    AuthResult resp = await post('/api/login', payload);
+    CASAuth.token = resp.jsonBody?['data'];
+    if (resp.code == 200 && resp.status == "ok") {
+      CASAuth.token = resp.jsonBody?['data'];
+    }
+
     return resp;
   }
 
@@ -153,11 +154,8 @@ class AuthClient {
     });
 
     AuthResult resp = await post('/api/login', payload);
-    token = resp.jsonBody?['data'];
-    currentUser = null;
-    if (resp.code == 200 && token != null && token!.isNotEmpty) {
-      await CASAuth.setToken(token!);
-      await userInfo();
+    if (resp.code == 200 && resp.status == "ok") {
+      CASAuth.token = resp.jsonBody?['data'];
     }
     return resp;
   }
@@ -202,12 +200,12 @@ class AuthClient {
   }
 
   static Future<AuthResult?> logout() async {
-    AuthResult resp = await get('/api/login/oauth/logout?id_token_hint=$token');
+    AuthResult resp =
+        await get('/api/login/oauth/logout?id_token_hint=${CASAuth.token}');
 
+    log("logout resp: ${resp.code}, ${resp.jsonBody}");
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
-      token = null;
-      currentUser = null;
-      await CASAuth.rmToken();
+      CASAuth.clearCache();
       return resp;
     }
 
@@ -235,24 +233,30 @@ class AuthClient {
     return await post("/api/send-verification-code", body, extHeader);
   }
 
-  static Future<bool> userInfo() async {
+  static Future<User?> userInfo() async {
     AuthResult resp = await get('/api/get-account');
     if (resp.status == "error") {
       log("get user info failed: ${resp.message}");
-      return false;
+      return null;
     }
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
     if (resp.code == 200 && json.isNotEmpty) {
-      currentUser = User.fromJson(json);
+      return User.fromJson(json);
     }
-    return true;
+    return null;
   }
 
   static Future<AuthResult> get(String endpoint,
       {Map<String, String>? extHeaders}) async {
     String url = CASAuth.server + endpoint;
 
-    return request("get", url, null, extHeaders);
+    Future<AuthResult> resp = request("get", url, null, extHeaders);
+    await resp.then((r) {
+      if (r.code == 200 && r.message == "Access token doesn't exist") {
+        CASAuth.clearCache();
+      }
+    });
+    return resp;
   }
 
   static Future<AuthResult> post(String endpoint,
@@ -276,10 +280,8 @@ class AuthClient {
       headers["content-type"] = "application/json";
     }
 
-    token ??= await CASAuth.getToken();
-
-    if (token != null) {
-      headers["Authorization"] = "Bearer $token";
+    if (CASAuth.token != null && CASAuth.token!.isNotEmpty) {
+      headers["Authorization"] = "Bearer ${CASAuth.token}";
     }
 
     method = method.toLowerCase();

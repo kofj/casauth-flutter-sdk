@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:convert';
 
+import 'package:casauth/casauth.dart';
+import 'package:casauth/user.dart';
 import 'package:flutter/material.dart';
 import 'package:colored_json/colored_json.dart';
 import 'package:casauth/client.dart';
@@ -49,52 +51,67 @@ class _LogedInState extends State<LogedIn> {
 
   @override
   Widget build(BuildContext context) {
-    if (AuthClient.currentUser == null) {
+    if (!CASAuth.isLogin) {
+      CASAuth.clearCache();
       return Container();
     }
-    ImageProvider avatar;
-    var user = AuthClient.currentUser!;
-    String avatarUrl = user.avatar;
-    if (avatarUrl.endsWith(".svg")) {
-      avatar = Svg(avatarUrl, source: SvgSource.network);
-    } else {
-      avatar = NetworkImage(avatarUrl);
-    }
+    return Container(
+      padding: const EdgeInsets.all(5),
+      child: FutureBuilder(
+          builder: (context, AsyncSnapshot<User?> snapshot) {
+            if ([
+              ConnectionState.none,
+              ConnectionState.active,
+              ConnectionState.waiting,
+            ].contains(snapshot.connectionState)) {
+              return const CircularProgressIndicator();
+            }
+            User? user = snapshot.data;
+            ImageProvider avatar;
+            String avatarUrl = user?.avatar ?? "";
+            if (avatarUrl.endsWith(".svg")) {
+              avatar = Svg(avatarUrl, source: SvgSource.network);
+            } else {
+              avatar = NetworkImage(avatarUrl);
+            }
 
-    String json = jsonEncode(user);
+            String json = jsonEncode(user);
 
-    return Column(
-      children: [
-        CircleAvatar(
-          backgroundImage: avatar,
-          minRadius: 32,
-          maxRadius: 64,
-        ),
-        const SizedBox(height: 20),
-        Text("ID: ${user.id}"),
-        const SizedBox(height: 20),
-        Text("User Name: ${user.name}  \tEmail: ${user.email}"),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 300,
-          child: SingleChildScrollView(
-            child: ColoredJson(
-              data: json,
-              indentLength: 2,
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, "/myapps"),
-            child: const Text("My Apps")),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () => logoutOnPressed(context),
-          child: const Text("Logout"),
-        ),
-        const SizedBox(height: 20),
-      ],
+            return Column(
+              children: [
+                CircleAvatar(
+                  backgroundImage: avatar,
+                  minRadius: 32,
+                  maxRadius: 64,
+                ),
+                const SizedBox(height: 20),
+                Text("ID: ${user?.id}"),
+                const SizedBox(height: 20),
+                Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 300,
+                  child: SingleChildScrollView(
+                    child: ColoredJson(
+                      data: json,
+                      indentLength: 2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                    onPressed: () => Navigator.pushNamed(context, "/myapps"),
+                    child: const Text("My Apps")),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => logoutOnPressed(context),
+                  child: const Text("Logout"),
+                ),
+                const SizedBox(height: 20),
+              ],
+            );
+          },
+          future: CASAuth.getCurrentUser()),
     );
   }
 }

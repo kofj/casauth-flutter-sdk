@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 class Unlogin extends StatefulWidget {
@@ -17,8 +15,9 @@ class _UnloginState extends State<Unlogin> {
       ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, "/login").then((value) {
-            log("update home page state, callback value: $value");
             widget.notifyParent();
+            debugPrint(
+                "[login.btn]update home page state, callback value: $value");
           });
         },
         child: const Text("Login"),
@@ -29,7 +28,8 @@ class _UnloginState extends State<Unlogin> {
       TextButton(
         onPressed: () {
           Navigator.pushNamed(context, "/signup").then((value) {
-            log("update home page state, callback value: $value");
+            debugPrint(
+                "[signup.btn]update home page state, callback value: $value");
             widget.notifyParent();
           });
         },
