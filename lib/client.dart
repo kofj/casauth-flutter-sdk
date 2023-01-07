@@ -2,6 +2,7 @@ library casauth;
 
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
 
@@ -9,6 +10,11 @@ import 'package:casauth/utils.dart';
 import 'package:casauth/casauth.dart';
 import 'package:casauth/result.dart';
 import 'package:casauth/user.dart';
+
+class AuthClientError extends Error {
+  final String message;
+  AuthClientError(this.message);
+}
 
 class AuthClient {
   // register a new user by username and password
@@ -19,14 +25,16 @@ class AuthClient {
   }) async {
     if (CASAuth.config.requiredSignupEmail ||
         CASAuth.config.requiredSignupPhone) {
-      throw ("Email and/or Phone is required, cannot signup with username only");
+      throw AuthClientError(
+          "Email and/or Phone is required, cannot signup with username only");
     }
     if (CASAuth.config.requiredSignupDisplayName && displayName.isEmpty) {
       displayName = username;
     }
 
     if (!CASAuth.config.hasSignupUsername) {
-      throw ("Username is not exists, cannot signup with username");
+      throw AuthClientError(
+          "Username is not exists, cannot signup with username");
     }
     var payload = jsonEncode({
       'username': username,
@@ -123,7 +131,7 @@ class AuthClient {
       case AccountType.phone:
         {
           if (!isCnPhoneNumber(phoneOrEmail)) {
-            throw ("Phone number is not allowed");
+            throw AuthClientError("Phone number is not allowed");
           }
           break;
         }
@@ -131,7 +139,7 @@ class AuthClient {
       case AccountType.email:
         {
           if (!EmailValidator.validate(phoneOrEmail)) {
-            throw ("Email is not valid");
+            throw AuthClientError("Email is not valid");
           }
           break;
         }
@@ -205,6 +213,7 @@ class AuthClient {
 
     log("logout resp: ${resp.code}, ${resp.jsonBody}");
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
+      debugPrint("logout success, clear cache");
       CASAuth.clearCache();
       return resp;
     }
@@ -237,7 +246,7 @@ class AuthClient {
     AuthResult resp = await get('/api/get-account');
     if (resp.status == "error") {
       log("get user info failed: ${resp.message}");
-      return null;
+      throw AuthClientError("get user info failed: ${resp.message}");
     }
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
     if (resp.code == 200 && json.isNotEmpty) {
@@ -254,6 +263,8 @@ class AuthClient {
     await resp.then((r) {
       if (r.code == 200 && r.message == "Access token doesn't exist") {
         CASAuth.clearCache();
+        debugPrint("tone not exist, clear cache");
+        throw AuthClientError("Access token doesn't exist");
       }
     });
     return resp;
@@ -291,7 +302,7 @@ class AuthClient {
     } else if (method == 'post') {
       response = await http.post(url, headers: headers, body: body);
     } else {
-      throw Exception('Unsupported method: $method');
+      throw AuthClientError('Unsupported method: $method');
     }
     return parseResponse(response);
   }

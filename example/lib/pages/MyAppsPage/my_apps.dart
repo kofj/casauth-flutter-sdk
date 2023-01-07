@@ -1,7 +1,7 @@
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:casauth/result.dart';
-import 'package:casauth_demo/components/appcard.dart';
+import 'package:casauth_example/components/appcard.dart';
 import 'package:flutter/material.dart';
 
 class MyApps extends StatefulWidget {

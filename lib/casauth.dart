@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:casauth/client.dart';
 import 'package:casauth/user.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +19,8 @@ class CASAuth {
   static String app = "";
   static String appId = "";
   static String server = "";
+  // digest is hash the server address
+  static String digest = "";
   static String publicKey = "";
   static String organization = "";
   static Config config = configFromJson("{}");
@@ -33,6 +36,7 @@ class CASAuth {
     if (userPrefix != null) {
       randomUsernamePrefix = userPrefix;
     }
+    digest = sha256.convert(utf8.encode(server)).toString();
   }
 
   static Future<void> init() async {
@@ -70,6 +74,14 @@ class CASAuth {
     return token != null;
   }
 
+  static String get keyToken {
+    return "$organization.auth.token.$digest";
+  }
+
+  static String get _keyCurrentUser {
+    return "$organization.current.user.$digest";
+  }
+
   static String? get token {
     return _prefs?.getString(keyToken);
   }
@@ -79,30 +91,29 @@ class CASAuth {
   }
 
   // clear cache in local storage
-  static Future<bool>? clearCache() {
+  static clearCache() {
     debugPrint("🕹 clearCache");
-    return _prefs?.clear();
-  }
-
-  static _keyCurrentUser() {
-    return "$organization.current.user}";
+    _prefs?.remove(keyToken);
+    _prefs?.remove(_keyCurrentUser);
   }
 
   static set currentUser(User? user) {
-    _prefs?.setString(_keyCurrentUser(), jsonEncode(user)).then((ok) {
+    _prefs?.setString(_keyCurrentUser, jsonEncode(user)).then((ok) {
       debugPrint("set currentUser $ok");
     });
   }
 
   static Future<User?> getCurrentUser() async {
-    String? cache = _prefs?.getString(_keyCurrentUser());
+    String? cache = _prefs?.getString(_keyCurrentUser);
     if (cache != null) {
       Map<String, dynamic> json = jsonDecode(cache);
       return User.fromJson(json);
     }
 
-    return AuthClient.userInfo();
+    var user = await AuthClient.userInfo();
+    if (user != null) {
+      currentUser = user;
+    }
+    return user;
   }
 }
-
-String keyToken = "casauth_token";

@@ -1,51 +1,26 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:developer';
 import 'dart:ui';
+import 'dart:async';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:casauth_demo/pages/SignUpPage/sign_up.dart';
-import 'package:casauth_demo/components/envinfo.dart';
-import 'package:casauth_demo/components/logedin.dart';
-import 'package:casauth_demo/components/unlogin.dart';
-import 'package:casauth_demo/config.dart';
+import 'package:casauth_example/pages/SignUpPage/sign_up.dart';
+import 'package:casauth_example/components/envinfo.dart';
+import 'package:casauth_example/components/logedin.dart';
+import 'package:casauth_example/components/unlogin.dart';
+import 'package:casauth_example/config.dart';
 import 'package:casauth/casauth.dart';
 import 'pages/LoginPage/log_in.dart';
 import 'pages/MyAppsPage/my_apps.dart';
 
-Config config = Config();
-Config devConfig = Config();
-Config prodConfig = Config();
+String currentEnv = const String.fromEnvironment("ENV", defaultValue: "prod");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
 
-  String mode = const String.fromEnvironment("APP_MODE", defaultValue: "dev");
-  appMode = mode.toAppMode();
-  log("APP_MODE env: ${appMode.name}, mode: ${appMode.name}");
+  var config = await Config.loadDotEnv(currentEnv);
 
-  rootBundle.loadString("dev.env").then((value) async {
-    if (value.isNotEmpty) {
-      devConfig = await loadConfigFromDotEnv("dev.env");
-      config = devConfig;
-    }
-  }).catchError((e) {
-    log("dev.env not found, use default config");
-  });
-
-  try {
-    prodConfig = await loadConfigFromDotEnv("prod.env");
-    if (appMode == AppMode.prod) {
-      config = prodConfig;
-    }
-  } catch (e) {
-    log("load prod.env error: ${e.toString()}");
-    exit(1);
-  }
-
-  await initSDK();
+  await initCASAuth(config);
 
   runZonedGuarded<Future<void>>(
     () async {
@@ -61,20 +36,7 @@ void main() async {
   );
 }
 
-Future<Config> loadConfigFromDotEnv(String file) async {
-  var dot = DotEnv();
-  await dot.load(fileName: file);
-  var config = Config(
-    appId: dot.env["CAS_APPID"].toString(),
-    server: dot.env["CAS_SERVER"].toString(),
-    appName: dot.env["CAS_APPNAME"].toString(),
-    orgnazationName: dot.env["CAS_ORG_NAME"].toString(),
-  );
-  log("load config from $file, value: ${dot.env.toString()}, config: ${config.toString()}");
-  return config;
-}
-
-Future<void> initSDK() async {
+Future<void> initCASAuth(Config config) async {
   try {
     log("init casauth SDK: ${config.server}, ${config.appId}, ${config.appName}, ${config.orgnazationName}");
     CASAuth(
@@ -125,43 +87,72 @@ class _MyHomePageState extends State<MyHomePage> {
     showDialog(
         context: context,
         builder: (context) {
+          var envs = ["local", "dev", "prod"];
+          List<Widget> btns = [];
+          btns.addAll(
+            envs.map((env) {
+              return ElevatedButton(
+                  onPressed: () {
+                    Config.loadDotEnv(env).then(
+                      (cfg) {
+                        initCASAuth(cfg);
+                        currentEnv = env;
+                        setState(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.green,
+                            content:
+                                Text("Config changed to [$env] env success"),
+                          ),
+                        );
+                      },
+                    ).onError((error, stackTrace) {
+                      debugPrint("load config failed: $error");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                              "Config changed to $env failed, error: $error"),
+                        ),
+                      );
+                    });
+
+                    Navigator.pop(context);
+                  },
+                  child: Text(env));
+            }),
+          );
+
           return AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             title: const Text("Change Config"),
-            actions: [
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    config = devConfig;
-                    initSDK();
-                    setState(() {
-                      appMode = AppMode.dev;
-                    });
-                  },
-                  child: const Text("dev")),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    config = prodConfig;
-                    initSDK();
-                    setState(() {
-                      appMode = AppMode.prod;
-                    });
-                  },
-                  child: const Text("prod")),
-            ],
+            actions: btns,
           );
         });
   }
 
   Widget buildAppModeIcon() {
-    if (appMode == AppMode.dev) {
-      return const Icon(Icons.electrical_services);
+    var icon = Icons.new_releases;
+    if (kDebugMode) {
+      icon = Icons.electrical_services;
+    } else if (kProfileMode) {
+      icon = Icons.precision_manufacturing_outlined;
     } else {
-      return const Icon(Icons.new_releases);
+      icon = Icons.new_releases;
     }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon),
+          Text("env: $currentEnv", style: const TextStyle(fontSize: 11))
+        ],
+      ),
+    );
   }
 
   void refresh() {

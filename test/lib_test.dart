@@ -224,9 +224,7 @@ void main() async {
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      User? user = await CASAuth.getCurrentUser();
-
-      expect(user, null, reason: "currentUser: ${jsonEncode(user)}");
+      expect(CASAuth.getCurrentUser(), throwsA(isA<AuthClientError>()));
     });
 
     test("Login with username that not exists", () async {
@@ -237,9 +235,7 @@ void main() async {
       expect(resp.status, "error",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
 
-      User? user = await CASAuth.getCurrentUser();
-
-      expect(user, null, reason: "currentUser: ${jsonEncode(user)}");
+      expect(CASAuth.getCurrentUser(), throwsA(isA<AuthClientError>()));
     });
   });
 
