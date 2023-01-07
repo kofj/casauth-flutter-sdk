@@ -99,3 +99,4 @@ flutter:
   assets:
     - dev.env # Add this line to include the dev.env file in the assets
     - prod.env
+    - local.env

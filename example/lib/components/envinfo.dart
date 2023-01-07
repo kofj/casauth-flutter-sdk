@@ -41,6 +41,11 @@ class _EnvInfoState extends State<EnvInfo> {
         ]),
         if (!kReleaseMode)
           TableRow(children: [
+            padding(const Text("Token Key")),
+            padding(Text(CASAuth.keyToken)),
+          ]),
+        if (!kReleaseMode)
+          TableRow(children: [
             padding(const Text("CAS Server")),
             padding(Text(CASAuth.server)),
           ]),

@@ -5,9 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "casauth",
+      "name": "example (local mode)",
+      "cwd": "example",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "args": [
+        "--dart-define",
+        "ENV=local"
+      ]
     },
     {
       "name": "example (dev mode)",
@@ -16,7 +21,7 @@
       "type": "dart",
       "args": [
         "--dart-define",
-        "APP_MODE=dev"
+        "ENV=dev"
       ]
     },
     {
@@ -27,7 +32,7 @@
       "flutterMode": "release",
       "args": [
         "--dart-define",
-        "APP_MODE=prod"
+        "ENV=prod"
       ]
     }
   ]

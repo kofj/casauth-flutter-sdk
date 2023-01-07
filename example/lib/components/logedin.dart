@@ -51,67 +51,68 @@ class _LogedInState extends State<LogedIn> {
 
   @override
   Widget build(BuildContext context) {
-    if (!CASAuth.isLogin) {
-      CASAuth.clearCache();
-      return Container();
-    }
     return Container(
       padding: const EdgeInsets.all(5),
       child: FutureBuilder(
-          builder: (context, AsyncSnapshot<User?> snapshot) {
-            if ([
-              ConnectionState.none,
-              ConnectionState.active,
-              ConnectionState.waiting,
-            ].contains(snapshot.connectionState)) {
-              return const CircularProgressIndicator();
-            }
-            User? user = snapshot.data;
-            ImageProvider avatar;
-            String avatarUrl = user?.avatar ?? "";
-            if (avatarUrl.endsWith(".svg")) {
-              avatar = Svg(avatarUrl, source: SvgSource.network);
-            } else {
-              avatar = NetworkImage(avatarUrl);
-            }
+        future: CASAuth.getCurrentUser(),
+        builder: (context, AsyncSnapshot<User?> snapshot) {
+          if ([
+            ConnectionState.none,
+            ConnectionState.active,
+            ConnectionState.waiting,
+          ].contains(snapshot.connectionState)) {
+            return const CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          }
+          User? user = snapshot.data;
+          ImageProvider avatar;
+          String avatarUrl = user?.avatar ?? "";
+          if (avatarUrl.endsWith(".svg")) {
+            avatar = Svg(avatarUrl, source: SvgSource.network);
+          } else {
+            avatar = NetworkImage(avatarUrl);
+          }
 
-            String json = jsonEncode(user);
+          String json = jsonEncode(user);
 
-            return Column(
-              children: [
-                CircleAvatar(
-                  backgroundImage: avatar,
-                  minRadius: 32,
-                  maxRadius: 64,
-                ),
-                const SizedBox(height: 20),
-                Text("ID: ${user?.id}"),
-                const SizedBox(height: 20),
-                Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 300,
-                  child: SingleChildScrollView(
-                    child: ColoredJson(
-                      data: json,
-                      indentLength: 2,
-                    ),
+          return Column(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.amber,
+                backgroundImage: avatar,
+                minRadius: 32,
+                maxRadius: 64,
+              ),
+              const SizedBox(height: 20),
+              Text("ID: ${user?.id}"),
+              const SizedBox(height: 20),
+              Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 300,
+                child: SingleChildScrollView(
+                  child: ColoredJson(
+                    data: json,
+                    indentLength: 2,
                   ),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, "/myapps"),
-                    child: const Text("My Apps")),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => logoutOnPressed(context),
-                  child: const Text("Logout"),
-                ),
-                const SizedBox(height: 20),
-              ],
-            );
-          },
-          future: CASAuth.getCurrentUser()),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                  onPressed: () => Navigator.pushNamed(context, "/myapps"),
+                  child: const Text("My Apps")),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => logoutOnPressed(context),
+                child: const Text("Logout"),
+              ),
+              const SizedBox(height: 20),
+            ],
+          );
+        },
+      ),
     );
   }
 }

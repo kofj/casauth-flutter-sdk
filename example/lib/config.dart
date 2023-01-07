@@ -1,19 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-AppMode appMode = AppMode.dev;
-
-bool get appIsDebug => appMode == AppMode.dev;
-
-enum AppMode {
-  dev,
-  prod,
-}
-
-extension AppModeEx on String {
-  AppMode toAppMode() => AppMode.values.firstWhere(
-        (d) => describeEnum(d) == toLowerCase(),
-      );
-}
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Config {
   String appName = "none";
@@ -31,5 +17,25 @@ class Config {
   @override
   String toString() {
     return "Config(appName: $appName, appId: $appId, orgnazationName: $orgnazationName, server: $server)";
+  }
+
+  static Future<Config> loadDotEnv(String name) async {
+    var file = "$name.env";
+    var dot = DotEnv();
+    try {
+      await dot.load(fileName: file);
+    } catch (err) {
+      throw Exception("load $file error: ${err.runtimeType}");
+    }
+
+    var config = Config(
+      appId: dot.env["CAS_APPID"].toString(),
+      server: dot.env["CAS_SERVER"].toString(),
+      appName: dot.env["CAS_APPNAME"].toString(),
+      orgnazationName: dot.env["CAS_ORG_NAME"].toString(),
+    );
+    debugPrint(
+        "load config from $file, value: ${dot.env.toString()}, config: ${config.toString()}");
+    return config;
   }
 }
