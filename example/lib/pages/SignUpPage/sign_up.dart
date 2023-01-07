@@ -4,7 +4,7 @@ import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:casauth/result.dart';
 import 'package:casauth/utils.dart';
-import 'package:casauth_demo/utils/cacheimage.dart';
+import 'package:casauth_example/utils/cacheimage.dart';
 import 'package:flutter/material.dart';
 
 class Signup extends StatefulWidget {

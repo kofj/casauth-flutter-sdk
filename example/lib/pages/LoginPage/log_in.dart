@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
-import 'package:casauth_demo/utils/cacheimage.dart';
+import 'package:casauth_example/utils/cacheimage.dart';
 import 'package:flutter/material.dart';
 
 @immutable
