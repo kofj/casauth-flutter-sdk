@@ -67,8 +67,8 @@ class AppCard extends StatelessWidget {
           ),
           ListTile(
             title: Text("${app.appName} / ${app.displayName}"),
-            subtitle:
-                Text("AppId: ${app.appId}\nDescription: ${app.description}"),
+            subtitle: Text(
+                "AppId: ${app.appId.substring(0, 5)} ***** ***** ${app.appId.substring(15, 20)}\nDescription: ${app.description}"),
           ),
           Padding(
             padding: const EdgeInsets.all(6),

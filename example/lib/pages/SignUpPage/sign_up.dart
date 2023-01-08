@@ -221,10 +221,10 @@ class _SignupState extends State<Signup> {
                     accountType = value as AccountType;
                   }),
                   items: const <DropdownMenuItem>[
-                    DropdownMenuItem(
-                      value: AccountType.username,
-                      child: Text("Username"),
-                    ),
+                    // DropdownMenuItem(
+                    //   value: AccountType.username,
+                    //   child: Text("Username"),
+                    // ),
                     DropdownMenuItem(
                       value: AccountType.email,
                       child: Text("Email"),
@@ -238,56 +238,63 @@ class _SignupState extends State<Signup> {
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'User Name',
-                    hintText: 'Enter valid username'),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                obscureText: true,
-                controller: passwordController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter your secure password'),
-              ),
-            ),
-
-            accountType == AccountType.phone
-                ? Padding(
+            AutofillGroup(
+              child: Column(
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(10),
                     child: TextField(
-                      obscureText: false,
-                      controller: phoneController,
+                      controller: usernameController,
+                      autofillHints: const ["username"],
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'Phone Number',
-                          hintText: 'Enter your phone number'),
+                          labelText: 'User Name',
+                          hintText: 'Enter valid username'),
                     ),
-                  )
-                : Container(),
-
-            accountType == AccountType.email
-                ? Padding(
+                  ),
+                  Padding(
                     padding: const EdgeInsets.all(10),
                     child: TextField(
-                      obscureText: false,
-                      controller: emailController,
+                      obscureText: true,
+                      controller: passwordController,
+                      autofillHints: const ["password"],
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          labelText: 'Email',
-                          hintText: 'Enter your email'),
+                          labelText: 'Password',
+                          hintText: 'Enter your secure password'),
                     ),
-                  )
-                : Container(),
+                  ),
+                  accountType == AccountType.phone
+                      ? Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: TextField(
+                            obscureText: false,
+                            controller: phoneController,
+                            autofillHints: const ["tel", "phone", "mobile"],
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Phone Number',
+                                hintText: 'Enter your phone number'),
+                          ),
+                        )
+                      : Container(),
+                  accountType == AccountType.email
+                      ? Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: TextField(
+                            obscureText: false,
+                            controller: emailController,
+                            autofillHints: const ["email"],
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Email',
+                                hintText: 'Enter your email'),
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
+            ),
 
             accountType.index > 0
                 ? Padding(

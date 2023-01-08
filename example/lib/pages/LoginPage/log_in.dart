@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
 import 'package:casauth_example/utils/cacheimage.dart';
@@ -48,25 +47,38 @@ class _LoginPageState extends State<LoginPage> {
                 child: cachedImage(CASAuth.config.logo),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'User Name',
-                    hintText: 'Enter valid mail id as abc@gmail.com'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                obscureText: true,
-                controller: passwordController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter your secure password'),
+            AutofillGroup(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: TextField(
+                      controller: usernameController,
+                      autofillHints: const [
+                        "username",
+                        "email",
+                        "phone",
+                        "mobile"
+                      ],
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'User Name',
+                          hintText: 'Enter valid mail id as abc@gmail.com'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: TextField(
+                      obscureText: true,
+                      autofillHints: const ["password", "pwd", "token"],
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Password',
+                          hintText: 'Enter your secure password'),
+                    ),
+                  ),
+                ],
               ),
             ),
 
