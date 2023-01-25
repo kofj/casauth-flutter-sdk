@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:casauth/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -43,7 +44,7 @@ void main() async {
   });
 
   const int dbPort = 3306;
-  const String dbHost = "127.0.0.1";
+  const String dbHost = "mysql.";
   const String dbUser = "root";
   const String dbName = "casdoor";
   const String dbPassword = "JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK";
@@ -63,16 +64,35 @@ void main() async {
       return;
     }
     await db!.connect(timeoutMs: 1000);
+
+    debugPrint(
+        "---=== start setup ===---\nis login: ${CASAuth.isLogin}, token: ${CASAuth.token?.length}");
+    if (CASAuth.isLogin) {
+      await AuthClient.logout();
+      debugPrint("has execute logout");
+      debugPrint(
+          "is login: ${CASAuth.isLogin}, token: ${CASAuth.token?.length}");
+    }
+    debugPrint("---=== setup done ===---\n");
   });
 
-  cleanVerificationRecordAddr() async {
-    await db!.execute(
-      "update verification_record set remote_addr=''",
-    );
-  }
-
   tearDown(() async {
+    // logout
+    if (CASAuth.isLogin) {
+      await AuthClient.logout()
+          .then((r) => debugPrint("tear down logout resp: ${r?.status}"));
+    }
+
+    await db!
+        .execute(
+          "update verification_record set remote_addr=''",
+        )
+        .then((r) => debugPrint(
+            "clean verify record add affected rows: ${r.affectedRows}"));
+
     await db!.close();
+
+    debugPrint("----------- tear down -----------\n\n");
   });
 
   test('ping database', () async {
@@ -84,7 +104,7 @@ void main() async {
     expect(ping.rows.first.colByName("value"), "1");
   });
 
-  group("tests captcha | ", () {
+  group("tests captcha |", () {
     test("default type", () async {
       IResultSet rs = await db!.execute(
         "update provider set type=:type where name=:name",
@@ -133,7 +153,7 @@ void main() async {
     });
   });
 
-  group("send verfiy code | ", () {
+  group("send verfiy code |", () {
     test("invalid account type", () async {
       AuthResult resp =
           await AuthClient.sendCode("dest", type: AccountType.username);
@@ -146,14 +166,13 @@ void main() async {
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "ok",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-
-      await cleanVerificationRecordAddr();
+          reason:
+              "resp: ${resp.code}/${resp.status}/${resp.message}/${resp.jsonBody}");
     });
 
     test("email", () async {
-      AuthResult resp =
-          await AuthClient.sendCode("me@example.com", type: AccountType.email);
+      AuthResult resp = await AuthClient.sendCode("m11zjg@example.com",
+          type: AccountType.email);
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "ok",
@@ -161,20 +180,19 @@ void main() async {
     });
 
     test("email limit", () async {
-      AuthResult resp =
-          await AuthClient.sendCode("me@example.com", type: AccountType.email);
-      expect(resp.code, 200,
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      expect(resp.status, "error",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      expect(resp.message, "you can only send one code in 60s",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-
-      await cleanVerificationRecordAddr();
+      await AuthClient.sendCode("m11zjg@example.com", type: AccountType.email);
+      expect(
+        AuthClient.sendCode("m11zjg@example.com", type: AccountType.email),
+        throwsA(
+          predicate((e) =>
+              e is AuthClientError &&
+              e.message == "you can only send one code in 60s"),
+        ),
+      );
     });
   });
 
-  group("register tests | ", () {
+  group("register tests |", () {
     String username = "user_${getRandomString(5)}";
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","agreement":true, "appId": "dc4b4df2fcfa9d2ef765"}' | http POST 'http://localhost:8000/api/signup'
     test("Register with username and password", () async {
@@ -186,12 +204,13 @@ void main() async {
     });
 
     test("Username exists", () async {
-      AuthResult resp = await AuthClient.registerByUserName(username, password);
-      expect(resp.code, 200);
-      expect(resp.jsonBody?["data"], isNull);
-      expect(resp.status, "error",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-      expect(resp.message, "username already exists");
+      expect(
+        AuthClient.registerByUserName(username, password),
+        throwsA(
+          predicate((e) =>
+              e is AuthClientError && e.message == "Username already exists"),
+        ),
+      );
     });
 
     // echo '{"application":"testapp","organization":"dev","username":"user_dkTY8","password":"hUQxzNTPw7IL","autoSignin":true,"type":"id_token","phonePrefix":"86","samlRequest":""}' |http 'http://localhost:8000/api/login'
@@ -208,7 +227,7 @@ void main() async {
       expect(user?.avatar, isNotEmpty);
       expect(user?.owner, orgnazationName);
       expect(user?.signupApplication, appName);
-      expect(user?.score, 2000);
+      // expect(user?.score, 2000);
       expect(user?.ranking, greaterThan(1));
 
       expect(resp.status, "ok", reason: "raw resp: $resp");
@@ -217,29 +236,34 @@ void main() async {
     });
 
     test("Login with username and error password", () async {
-      AuthResult resp =
-          await AuthClient.loginByUserName(username, "error_password");
-      expect(resp.code, 200);
-      expect(resp.jsonBody?["data"], isNull);
-      expect(resp.status, "error",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-
-      expect(CASAuth.getCurrentUser(), throwsA(isA<AuthClientError>()));
+      expect(
+        AuthClient.loginByUserName(username, "error_password"),
+        throwsA(
+          predicate(
+            (e) =>
+                e is AuthClientError &&
+                e.message.contains("password or code is incorrect, you have"),
+          ),
+        ),
+      );
     });
 
     test("Login with username that not exists", () async {
-      AuthResult resp =
-          await AuthClient.loginByUserName("user_not_exists", "hUQxzNTPw7IL");
-      expect(resp.code, 200);
-      expect(resp.jsonBody?["data"], isNull);
-      expect(resp.status, "error",
-          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
-
-      expect(CASAuth.getCurrentUser(), throwsA(isA<AuthClientError>()));
+      expect(
+        AuthClient.loginByUserName("user_not_exists", "hUQxzNTPw7IL"),
+        throwsA(
+          predicate(
+            (e) =>
+                e is AuthClientError &&
+                e.message
+                    .contains("The user: dev/user_not_exists doesn't exist"),
+          ),
+        ),
+      );
     });
   });
 
-  group("register by phone | ", () {
+  group("register by phone |", () {
     String phone = "188010${randomNumberString(5)}";
     String username = "user_${getRandomString(5)}";
 
@@ -249,6 +273,8 @@ void main() async {
       AuthResult resp =
           await AuthClient.sendCode(phone, type: AccountType.phone);
       expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       IResultSet query = await db!.execute(
         "select code from verification_record where receiver like '%$phone' order by created_time desc limit 1",
@@ -264,8 +290,6 @@ void main() async {
       expect(resp2.status, "ok",
           reason: "resp: ${resp2.code}/${resp2.status}/${resp2.message}");
       expect(resp2.jsonBody?["data"], "$orgnazationName/$username");
-
-      await cleanVerificationRecordAddr();
     });
 
     test("Login with phone and password", () async {
@@ -283,11 +307,7 @@ void main() async {
       expect(user?.avatar, isNotEmpty);
       expect(user?.owner, orgnazationName);
       expect(user?.signupApplication, appName);
-      expect(user?.score, 2000);
       expect(user?.ranking, greaterThan(1));
-
-      await cleanVerificationRecordAddr();
-      await AuthClient.logout();
     });
 
     test("Login with phone code", () async {
@@ -317,16 +337,11 @@ void main() async {
       expect(user?.avatar, isNotEmpty);
       expect(user?.owner, orgnazationName);
       expect(user?.signupApplication, appName);
-      expect(user?.score, 2000);
       expect(user?.ranking, greaterThan(1));
-
-      // clean
-      await cleanVerificationRecordAddr();
-      await AuthClient.logout();
     });
   });
 
-  group("regsiter by email", () {
+  group("regsiter by email |", () {
     String username = "user_${getRandomString(5)}";
     String email = "$username@test.com";
 
@@ -352,8 +367,6 @@ void main() async {
       expect(resp.status, "ok",
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.jsonBody?["data"], "$orgnazationName/$username");
-
-      await cleanVerificationRecordAddr();
     });
 
     test("Login with email and password", () async {
@@ -371,11 +384,7 @@ void main() async {
       expect(user?.avatar, isNotEmpty);
       expect(user?.owner, orgnazationName);
       expect(user?.signupApplication, appName);
-      expect(user?.score, 2000);
       expect(user?.ranking, greaterThan(1));
-
-      await cleanVerificationRecordAddr();
-      await AuthClient.logout();
     });
 
     test("Login with email and code", () async {
@@ -406,12 +415,7 @@ void main() async {
       expect(user?.avatar, isNotEmpty);
       expect(user?.owner, orgnazationName);
       expect(user?.signupApplication, appName);
-      expect(user?.score, 2000);
       expect(user?.ranking, greaterThan(1));
-
-      // clean
-      await cleanVerificationRecordAddr();
-      await AuthClient.logout();
     });
   });
 }

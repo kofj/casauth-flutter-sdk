@@ -91,8 +91,8 @@ class CASAuth {
   }
 
   // clear cache in local storage
-  static clearCache() {
-    debugPrint("🕹 clearCache");
+  static clearCache() async {
+    debugPrint("🕹 clear casauth cache");
     _prefs?.remove(keyToken);
     _prefs?.remove(_keyCurrentUser);
   }

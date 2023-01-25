@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 @immutable
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final Function() notifyParent;
+  const LoginPage({Key? key, required this.notifyParent}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -29,114 +30,122 @@ class _LoginPageState extends State<LoginPage> {
       return Container();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              height: 150.0,
-              width: 190.0,
-              padding: const EdgeInsets.only(top: 40),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(200),
-              ),
-              child: Center(
-                child: cachedImage(CASAuth.config.logo),
-              ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            height: 150.0,
+            width: 190.0,
+            padding: const EdgeInsets.only(top: 40),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(200),
             ),
-            AutofillGroup(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: TextField(
-                      controller: usernameController,
-                      autofillHints: const [
-                        "username",
-                        "email",
-                        "phone",
-                        "mobile"
-                      ],
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'User Name',
-                          hintText: 'Enter valid mail id as abc@gmail.com'),
-                    ),
+            child: Center(
+              child: cachedImage(CASAuth.config.logo),
+            ),
+          ),
+          AutofillGroup(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    controller: usernameController,
+                    autofillHints: const [
+                      "username",
+                      "email",
+                      "phone",
+                      "mobile"
+                    ],
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'User Name',
+                        hintText: 'Enter valid mail id as abc@gmail.com'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: TextField(
-                      obscureText: true,
-                      autofillHints: const ["password", "pwd", "token"],
-                      controller: passwordController,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Password',
-                          hintText: 'Enter your secure password'),
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    obscureText: true,
+                    autofillHints: const ["password", "pwd", "token"],
+                    controller: passwordController,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Password',
+                        hintText: 'Enter your secure password'),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+
+          // buttons
+          const SizedBox(
+            height: 10,
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: ElevatedButton(
+              onPressed: () async {
+                String username = usernameController.text;
+                String password = passwordController.text;
+                try {
+                  AuthClient.loginByUserName(username, password).then((resp) {
+                    if (resp.status == "error") {
+                      log("❌ login failed, error: ${resp.message}, body: ${resp.jsonBody}");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text(
+                              "login failed, error: ${resp.message}, body: ${resp.jsonBody}"),
+                        ),
+                      );
+                      // Navigator.pop(context, false);
+                      widget.notifyParent();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text("Login Success"),
+                        ),
+                      );
+                      log("login success, body: ${resp.jsonBody?.isNotEmpty}");
+                      // Navigator.pop(context, true);
+                      widget.notifyParent();
+                    }
+                  });
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text(e.toString()),
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              child: const Text(
+                'Login',
+                style: TextStyle(color: Colors.white),
               ),
             ),
+          ),
 
-            // buttons
-            const SizedBox(
-              height: 10,
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, "/signup");
+            },
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.black54),
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: ElevatedButton(
-                onPressed: () async {
-                  String username = usernameController.text;
-                  String password = passwordController.text;
-                  try {
-                    AuthClient.loginByUserName(username, password).then((resp) {
-                      if (resp.status == "error") {
-                        log("❌ login failed, error: ${resp.message}, body: ${resp.jsonBody}");
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.red,
-                            content: Text(
-                                "login failed, error: ${resp.message}, body: ${resp.jsonBody}"),
-                          ),
-                        );
-                        Navigator.pop(context, false);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Colors.green,
-                            content: Text("Login Success"),
-                          ),
-                        );
-                        log("login success, body: ${resp.jsonBody?.isNotEmpty}");
-                        Navigator.pop(context, true);
-                      }
-                    });
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text(e.toString()),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
+            child: const Text('New User? Create Account'),
+          )
+        ],
       ),
+      // ),
     );
   }
 }

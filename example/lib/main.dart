@@ -1,12 +1,11 @@
 import 'dart:ui';
 import 'dart:async';
 import 'dart:developer';
+import 'package:casauth_example/pages/EnvInfoPage/env_info_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:casauth_example/pages/SignUpPage/sign_up.dart';
-import 'package:casauth_example/components/envinfo.dart';
 import 'package:casauth_example/components/logedin.dart';
-import 'package:casauth_example/components/unlogin.dart';
 import 'package:casauth_example/config.dart';
 import 'package:casauth/casauth.dart';
 import 'pages/LoginPage/log_in.dart';
@@ -65,7 +64,7 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (context) => const MyHomePage(title: 'CASAuth'),
-        "/login": (context) => const LoginPage(),
+        "/login": (context) => LoginPage(notifyParent: () => null),
         "/signup": (context) => const Signup(),
         "/myapps": (context) => const MyApps(),
       },
@@ -83,6 +82,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+
   void showChangeCfgDialog(BuildContext context) {
     showDialog(
         context: context,
@@ -168,28 +169,64 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Text(widget.title),
       ),
     );
-    var list = <Widget>[SizedBox(height: appbar.preferredSize.height)];
 
-    log("token length: ${CASAuth.token?.length}");
+    Widget body = Container();
+    Widget? navbar;
+
     if (CASAuth.isLogin) {
-      list.add(Center(child: LogedIn(notifyParent: refresh)));
-    } else {
-      list.add(Center(child: Unlogin(notifyParent: refresh)));
-    }
+      switch (_currentIndex) {
+        case 0:
+          body = const MyApps();
+          break;
+        case 1:
+          body = const EnvInfoPage();
+          break;
 
-    // ignore: prefer_const_constructors
-    list.add(EnvInfo());
+        case 2:
+          body = LogedIn(notifyParent: refresh);
+          break;
+
+        default:
+          body = LogedIn(notifyParent: refresh);
+          break;
+      }
+
+      // body = const BottomNavigationBarPage();
+      navbar = BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.energy_savings_leaf),
+            label: "Env",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.apps),
+            label: "Mine",
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      );
+    } else {
+      body = SafeArea(
+        child: LoginPage(notifyParent: refresh),
+      );
+    }
 
     return Scaffold(
       appBar: appbar,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: list,
-          ),
-        ),
+      body: Container(
+        padding: const EdgeInsets.all(10),
+        child: body,
       ),
+      bottomNavigationBar: navbar,
     );
   }
 }

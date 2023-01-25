@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:casauth/casauth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,10 @@ class _EnvInfoState extends State<EnvInfo> {
         TableRow(children: [
           padding(const Text("CAS App")),
           padding(Text("${CASAuth.organization}/${CASAuth.app}")),
+        ]),
+        TableRow(children: [
+          padding(const Text("SDK Info")),
+          padding(Text(Platform.version)),
         ]),
         TableRow(children: [
           padding(const Text("Pkg Info")),

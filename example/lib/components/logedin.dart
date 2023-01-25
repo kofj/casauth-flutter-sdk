@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:casauth/casauth.dart';
 import 'package:casauth/user.dart';
+import 'package:casauth_example/components/btn.dart';
 import 'package:flutter/material.dart';
 import 'package:colored_json/colored_json.dart';
 import 'package:casauth/client.dart';
@@ -77,39 +78,60 @@ class _LogedInState extends State<LogedIn> {
 
           String json = jsonEncode(user);
 
-          return Column(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.amber,
-                backgroundImage: avatar,
-                minRadius: 32,
-                maxRadius: 64,
-              ),
-              const SizedBox(height: 20),
-              Text("ID: ${user?.id}"),
-              const SizedBox(height: 20),
-              Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 300,
-                child: SingleChildScrollView(
-                  child: ColoredJson(
-                    data: json,
-                    indentLength: 2,
+          return SingleChildScrollView(
+            child: Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.amber,
+                    backgroundImage: avatar,
+                    minRadius: 32,
+                    maxRadius: 64,
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  Text("ID: ${user?.id}"),
+                  const SizedBox(height: 20),
+                  Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 300,
+                    child: SingleChildScrollView(
+                      child: ColoredJson(
+                        data: json,
+                        indentLength: 2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Card(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: Text(
+                            "Delete Account",
+                            style: TextStyle(
+                              color: Colors.red[300],
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          subtitle: Text(
+                              "For the security of your account, we will not destroy your current account (${user?.name}) and data after receiving the cancellation request."),
+                        ),
+                        const SizedBox(height: 20),
+                        maxButton(
+                            "Request Delete Account", Colors.red[300]!, () {}),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => logoutOnPressed(context),
+                    child: const Text("Logout"),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, "/myapps"),
-                  child: const Text("My Apps")),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => logoutOnPressed(context),
-                child: const Text("Logout"),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
           );
         },
       ),

@@ -2,13 +2,11 @@ version: '3.1'
 services:
   casdoor:
     restart: always
-    image: casbin/casdoor:v1.123.0
+    image: casbin/casdoor:v1.223.0
     container_name: casdoor.server
     entrypoint: /bin/sh -c 'sleep 30 && ./server --createDatabase=true'
     ports:
       - "0.0.0.0:8000:8000"
-      - "0.0.0.0:8025:8025"
-      - "0.0.0.0:1025:1025"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 1s
@@ -22,7 +20,7 @@ services:
       - ./conf:/conf/
   mysql:
     restart: always
-    image: mysql:8.0.25
+    image: mysql:8.0.31
     platform: linux/amd64
     container_name: casdoor.mysql
     healthcheck:
@@ -41,10 +39,10 @@ services:
   flutter:
     restart: always
     working_dir: /workspace/
-    network_mode: "service:mysql"
     image:  cirrusci/flutter:3.3.0
+    # image: fischerscode/flutter:3.3.2
     container_name: casdoor.flutter
-    entrypoint: /bin/sh -c 'sleep 6000'
+    entrypoint: /bin/sh -c 'sleep 7200000'
     depends_on:
       - mysql
       - casdoor
@@ -58,7 +56,9 @@ services:
     restart: always
     image: mailhog/mailhog
     container_name: casdoor.smtp
-    network_mode: "service:casdoor"
+    ports:
+      - "0.0.0.0:8025:8025"
+      - "0.0.0.0:1025:1025"
     depends_on:
       - mysql
       - casdoor
