@@ -221,10 +221,10 @@ class _SignupState extends State<Signup> {
                     accountType = value as AccountType;
                   }),
                   items: const <DropdownMenuItem>[
-                    // DropdownMenuItem(
-                    //   value: AccountType.username,
-                    //   child: Text("Username"),
-                    // ),
+                    DropdownMenuItem(
+                      value: AccountType.username,
+                      child: Text("Username"),
+                    ),
                     DropdownMenuItem(
                       value: AccountType.email,
                       child: Text("Email"),

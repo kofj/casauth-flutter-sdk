@@ -44,13 +44,8 @@ class _MyAppsState extends State<MyApps> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Apps"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(children: list),
-      ),
+    return SingleChildScrollView(
+      child: Column(children: list),
     );
   }
 

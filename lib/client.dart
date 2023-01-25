@@ -47,6 +47,15 @@ class AuthClient {
 
     AuthResult resp = await post('/api/signup', payload);
 
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      debugPrint(
+          "😱 registor failed, resp code ${resp.code}, body: ${resp.jsonBody}");
+      throw AuthClientError(resp.message!);
+    }
+
     return resp;
   }
 
@@ -72,6 +81,14 @@ class AuthClient {
 
     AuthResult resp = await post('/api/login', payload);
     CASAuth.token = resp.jsonBody?['data'];
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      debugPrint(
+          "🤬 login failed, response code ${resp.code}, body: ${resp.jsonBody}");
+      throw AuthClientError(resp.message!);
+    }
     if (resp.code == 200 && resp.status == "ok") {
       CASAuth.token = resp.jsonBody?['data'];
     }
@@ -116,6 +133,13 @@ class AuthClient {
       'organization': CASAuth.organization,
     });
     AuthResult resp = await post('/api/signup', payload);
+
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw AuthClientError(resp.message!);
+    }
 
     return resp;
   }
@@ -162,6 +186,12 @@ class AuthClient {
     });
 
     AuthResult resp = await post('/api/login', payload);
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw AuthClientError(resp.message!);
+    }
     if (resp.code == 200 && resp.status == "ok") {
       CASAuth.token = resp.jsonBody?['data'];
     }
@@ -198,6 +228,13 @@ class AuthClient {
     });
     AuthResult resp = await post('/api/signup', payload);
 
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw AuthClientError(resp.message!);
+    }
+
     return resp;
   }
 
@@ -211,10 +248,12 @@ class AuthClient {
     AuthResult resp =
         await get('/api/login/oauth/logout?id_token_hint=${CASAuth.token}');
 
-    log("logout resp: ${resp.code}, ${resp.jsonBody}");
-    if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
-      debugPrint("logout success, clear cache");
-      CASAuth.clearCache();
+    if (
+        // case 1: token exists, response 2000
+        (resp.code == 200 && resp.jsonBody?['data'] == "Affected") ||
+            // case 2: token not exists, response 404
+            (resp.code == 404)) {
+      await CASAuth.clearCache();
       return resp;
     }
 
@@ -229,17 +268,25 @@ class AuthClient {
     String? checkKey = "",
     String? checkType = "none",
     String? checkUser = "",
+    String? method = "signup",
   }) async {
     if (type != AccountType.phone && type != AccountType.email) {
       return AuthResult(400,
           respStatus: "error", respMessage: "invalid account type: $type");
     }
     String body =
-        "applicationId=admin/${CASAuth.app}&checkType=$checkType&checkId=$checkId&checkKey=$checkKey&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
+        "applicationId=admin/${CASAuth.app}&method=$method&checkType=$checkType&checkId=$checkId&checkKey=$checkKey&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
     Map<String, String> extHeader = {
       "content-type": "application/x-www-form-urlencoded"
     };
-    return await post("/api/send-verification-code", body, extHeader);
+    var resp = await post("/api/send-verification-code", body, extHeader);
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw AuthClientError(resp.message!);
+    }
+    return resp;
   }
 
   static Future<User?> userInfo() async {
@@ -249,6 +296,12 @@ class AuthClient {
       throw AuthClientError("get user info failed: ${resp.message}");
     }
     Map<String, dynamic> json = resp.jsonBody?['data'] as Map<String, dynamic>;
+    if (resp.code != 200) {
+      throw AuthClientError("server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw AuthClientError(resp.message!);
+    }
     if (resp.code == 200 && json.isNotEmpty) {
       return User.fromJson(json);
     }
@@ -259,14 +312,14 @@ class AuthClient {
       {Map<String, String>? extHeaders}) async {
     String url = CASAuth.server + endpoint;
 
-    Future<AuthResult> resp = request("get", url, null, extHeaders);
-    await resp.then((r) {
-      if (r.code == 200 && r.message == "Access token doesn't exist") {
-        CASAuth.clearCache();
-        debugPrint("tone not exist, clear cache");
-        throw AuthClientError("Access token doesn't exist");
-      }
-    });
+    AuthResult resp = await request("get", url, null, extHeaders);
+
+    if (resp.code == 200 && resp.message == "Access token doesn't exist") {
+      await CASAuth.clearCache();
+      debugPrint("token not exist, clear cache");
+      throw AuthClientError("Access token doesn't exist");
+    }
+
     return resp;
   }
 
@@ -291,7 +344,7 @@ class AuthClient {
       headers["content-type"] = "application/json";
     }
 
-    if (CASAuth.token != null && CASAuth.token!.isNotEmpty) {
+    if (CASAuth.isLogin) {
       headers["Authorization"] = "Bearer ${CASAuth.token}";
     }
 
