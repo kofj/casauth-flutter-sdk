@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:casauth/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mysql_client/mysql_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:casauth/casauth.dart';
 import 'package:casauth/client.dart';
@@ -11,6 +11,9 @@ import 'package:casauth/utils.dart';
 import 'package:casauth/result.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   const String appName =
       String.fromEnvironment("CAS_APPNAME", defaultValue: "testapp");
   const String appId =
@@ -28,23 +31,9 @@ void main() async {
 
   await CASAuth.init();
 
-  test('test config', () async {
-    var cfg = CASAuth.config;
-    expect(cfg.name, appName);
-    expect(cfg.owner, "admin");
-    expect(cfg.clientId, appId);
-    expect(cfg.organization, orgnazationName);
-  });
-
-  test("Check CASAuth Instance", () {
-    expect(CASAuth.app, appName);
-    expect(CASAuth.appId, appId);
-    expect(CASAuth.server, server);
-    expect(CASAuth.organization, orgnazationName);
-  });
-
   const int dbPort = 3306;
-  const String dbHost = "mysql.";
+  const String dbHost =
+      String.fromEnvironment("UT_MYSQL_HOST", defaultValue: "mysql.");
   const String dbUser = "root";
   const String dbName = "casdoor";
   const String dbPassword = "JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK";
@@ -83,16 +72,31 @@ void main() async {
           .then((r) => debugPrint("tear down logout resp: ${r?.status}"));
     }
 
-    await db!
-        .execute(
+    await db
+        ?.execute(
           "update verification_record set remote_addr=''",
         )
         .then((r) => debugPrint(
             "clean verify record add affected rows: ${r.affectedRows}"));
 
-    await db!.close();
+    await db?.close();
 
     debugPrint("----------- tear down -----------\n\n");
+  });
+
+  test('test config', () async {
+    var cfg = CASAuth.config;
+    expect(cfg.name, appName);
+    expect(cfg.owner, "admin");
+    expect(cfg.clientId, appId);
+    expect(cfg.organization, orgnazationName);
+  });
+
+  test("check CASAuth instance", () {
+    expect(CASAuth.app, appName);
+    expect(CASAuth.appId, appId);
+    expect(CASAuth.server, server);
+    expect(CASAuth.organization, orgnazationName);
   });
 
   test('ping database', () async {
