@@ -11,9 +11,6 @@ class EnvInfoPage extends StatefulWidget {
 class _EnvInfoPageState extends State<EnvInfoPage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      child: const EnvInfo(),
-    );
+    return const EnvInfo();
   }
 }

@@ -19,73 +19,42 @@ class _EnvInfoState extends State<EnvInfo> {
 
   @override
   Widget build(BuildContext context) {
-    List<TableRow> rowList = [];
-    rowList.addAll(
-      [
-        TableRow(children: [
-          padding(const Text("CAS App")),
-          padding(Text("${CASAuth.organization}/${CASAuth.app}")),
-        ]),
-        TableRow(children: [
-          padding(const Text("SDK Info")),
-          padding(Text(Platform.version)),
-        ]),
-        TableRow(children: [
-          padding(const Text("Pkg Info")),
-          padding(
-            FutureBuilder(
-              builder: ((context, snapshot) {
-                if (snapshot.hasData) {
-                  PackageInfo package = snapshot.data as PackageInfo;
-                  return Text(package.toString());
-                }
-                return const Text("loading...");
-              }),
-              future: PackageInfo.fromPlatform(),
-            ),
-          ),
-        ]),
-        if (!kReleaseMode)
-          TableRow(children: [
-            padding(const Text("Token Key")),
-            padding(Text(CASAuth.keyToken)),
-          ]),
-        if (!kReleaseMode)
-          TableRow(children: [
-            padding(const Text("CAS Server")),
-            padding(Text(CASAuth.server)),
-          ]),
-        if (!kReleaseMode)
-          TableRow(children: [
-            padding(const Text("CAS AppID")),
-            padding(Text(CASAuth.appId)),
-          ]),
-        TableRow(children: [
-          padding(const Text("App Mode")),
-          padding(const Text(
-              "debug: $kDebugMode, release: $kReleaseMode, profile: $kProfileMode"))
-        ]),
-        TableRow(children: [
-          padding(const Text("JWT Token")),
-          padding(Text(CASAuth.token ?? "")),
-        ]),
-      ],
-    );
-
-    return padding(
-      Table(
-        columnWidths: const {
-          0: FixedColumnWidth(100),
-          1: FlexColumnWidth(),
-        },
-        border: TableBorder.all(
-          color: Colors.black26,
-          style: BorderStyle.solid,
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-          width: 2,
-        ),
-        children: rowList,
+    Map<String, Widget> kvs = {
+      "CAS App": Text("${CASAuth.organization}/${CASAuth.app}"),
+      "SDK Version": Text(Platform.version),
+      "Pkg Info": FutureBuilder(
+        builder: ((context, snapshot) {
+          if (snapshot.hasData) {
+            PackageInfo package = snapshot.data as PackageInfo;
+            return Text(package.toString());
+          }
+          return const Text("loading...");
+        }),
+        future: PackageInfo.fromPlatform(),
       ),
-    );
+      if (!kReleaseMode) "Token Key": Text(CASAuth.keyToken),
+      if (!kReleaseMode) "CAS AppID": Text(CASAuth.appId),
+      "App Mode": const Text(
+          "debug: $kDebugMode, release: $kReleaseMode, profile: $kProfileMode"),
+      "JWT Token": Text(CASAuth.token ?? ""),
+    };
+
+    var childs = kvs.entries.map((item) {
+      return Card(
+        elevation: 5.0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(5.0),
+          ),
+        ),
+        child: ListTile(
+          title: Text(item.key),
+          subtitle: item.value,
+        ),
+      );
+    }).toList();
+
+    //
+    return Column(children: childs);
   }
 }
