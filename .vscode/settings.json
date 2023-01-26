@@ -1,0 +1,5 @@
+{
+    "dart.flutterTestAdditionalArgs": [
+        "--dart-define=UT_MYSQL_HOST=localhost"
+    ]
+}
