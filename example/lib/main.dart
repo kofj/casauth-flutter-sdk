@@ -216,13 +216,17 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     } else {
       body = SafeArea(
-        child: LoginPage(notifyParent: refresh),
+        child: LoginPage(notifyParent: () {
+          setState(() {
+            _currentIndex = 0;
+          });
+        }),
       );
     }
 
     return Scaffold(
       appBar: appbar,
-      body: Container(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
         child: body,
       ),

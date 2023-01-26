@@ -62,7 +62,7 @@ class _LogedInState extends State<LogedIn> {
             ConnectionState.active,
             ConnectionState.waiting,
           ].contains(snapshot.connectionState)) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Text("Error: ${snapshot.error}");
@@ -78,60 +78,62 @@ class _LogedInState extends State<LogedIn> {
 
           String json = jsonEncode(user);
 
-          return SingleChildScrollView(
-            child: Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.amber,
-                    backgroundImage: avatar,
-                    minRadius: 32,
-                    maxRadius: 64,
-                  ),
-                  const SizedBox(height: 20),
-                  Text("ID: ${user?.id}"),
-                  const SizedBox(height: 20),
-                  Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 300,
-                    child: SingleChildScrollView(
-                      child: ColoredJson(
-                        data: json,
-                        indentLength: 2,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Card(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title: Text(
-                            "Delete Account",
-                            style: TextStyle(
-                              color: Colors.red[300],
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          subtitle: Text(
-                              "For the security of your account, we will not destroy your current account (${user?.name}) and data after receiving the cancellation request."),
-                        ),
-                        const SizedBox(height: 20),
-                        maxButton(
-                            "Request Delete Account", Colors.red[300]!, () {}),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => logoutOnPressed(context),
-                    child: const Text("Logout"),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+          return Column(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.amber,
+                backgroundImage: avatar,
+                minRadius: 32,
+                maxRadius: 64,
               ),
-            ),
+              const SizedBox(height: 20),
+              Text("ID: ${user?.id}"),
+              const SizedBox(height: 20),
+              Text("User Name: ${user?.name}  \tEmail: ${user?.email}"),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 300,
+                child: SingleChildScrollView(
+                  child: ColoredJson(
+                    data: json,
+                    indentLength: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: Text(
+                        "Delete Account",
+                        style: TextStyle(
+                          color: Colors.red[300],
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      subtitle: Text(
+                          "For the security of your account, we will not destroy your current account (${user?.name}) and data after receiving the cancellation request."),
+                    ),
+                    const SizedBox(height: 20),
+                    maxButton("Request Delete Account", Colors.red[300]!, () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.blue,
+                          content: Text("has submit"),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => logoutOnPressed(context),
+                child: const Text("Logout"),
+              ),
+              const SizedBox(height: 20),
+            ],
           );
         },
       ),

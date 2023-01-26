@@ -44,9 +44,7 @@ class _MyAppsState extends State<MyApps> {
       ),
     );
 
-    return SingleChildScrollView(
-      child: Column(children: list),
-    );
+    return Column(children: list);
   }
 
   @override
