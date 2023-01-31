@@ -16,3 +16,6 @@ casdoor-isup:
 unit-test: casdoor-isup
 	@docker ps
 	@docker exec -t casdoor.flutter bash -c 'flutter pub get && flutter test --dart-define=CAS_SERVER=http://casdoor:8000'
+
+host-ut: casdoor-isup
+	@flutter pub get && flutter test --dart-define=UT_MYSQL_HOST=localhost

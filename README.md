@@ -6,7 +6,7 @@ A third Flutter client SDK for casdoor. Support follow platform:
 
 | platform | tested | example |
 | ---| ---| ---|
-| iOS | ✅ | [App Store]() | 
+| iOS | ✅ | - |
 | macOS | ✅ | [Download]() |
 | linux | [-] | - |
 | Windows | [-] | - |
@@ -18,11 +18,14 @@ You need install self's casdoor first. And I only test this SDK with a little ve
 |---|---|---|
 | v1.1.0 | v1.97.0 | ✅ |
 | v1.1.0 | v1.123.0 | ✅ |
+| v1.2.0 | v1.223.0 | ✅ |
 
 
 ## Usage
 
-In the [example](example) folder has a full app example develop with Flutter v3.3.0 and Casdoor. I will show howto use this SDK follow:
+In the [example](example) folder has a full app example develop with Flutter v3.3.0 and Casdoor. If casdoor server response `status` is **error** or `code` not `200`, the SDK will thorws `AuthClientError`.
+
+I will show howto use this SDK follow:
 
 ### initiate
 
@@ -33,16 +36,22 @@ String appId = "some-app-id";
 String appName = "app-example";
 String orgnazationName = "casbin";
 String server = "https://door.casdoor.com";
+
+try {
 CASAuth(
   appName,
   appId,
   server,
   orgnazationName,
 );
+await CASAuth.init();
+
+} catch (e) {
+  debugPrint("init casauth SDK failed: $e");
+}
 ```
 
 ### login
-
 ```dart
 AuthResult resp =  AuthClient.loginByUserName(username, password);
 ```
@@ -52,13 +61,6 @@ AuthResult resp =  AuthClient.loginByUserName(username, password);
 Register new user only with `username` and `password`. If `displayName` is required by casdoor, it will be same with `username`.
 ```dart
 AuthResult resp = await AuthClient.registerByUserName(username, password);
-
-if (resp.status == "error") {
-  // handle error
-  log("signup failed, error: ${resp.message}, body: ${resp.jsonBody}");
-} else {
-  // that's ok
-}
 ```
 
 Regsiter new user with `email` and `verification code`, `username`, `password` and `displayName` is optional. if `username` adn `password` is required by casdoor, it will be filled with random string.
@@ -71,12 +73,6 @@ AuthResult resp = await AuthClient.registerByEmail(
   password: password,
 );
 
-if (resp.status == "error") {
-  // handle error
-  log("signup failed, error: ${resp.message}, body: ${resp.jsonBody}");
-} else {
-  // that's ok
-}
 ```
 
 Regsiter new user with `phone` and `verification code`, `username`, `password` and `displayName` is optional.
@@ -88,13 +84,6 @@ AuthResult resp = await AuthClient.registerByPhone(
   username: username,
   password: password,
 );
-
-if (resp.status == "error") {
-  // handle error
-  log("signup failed, error: ${resp.message}, body: ${resp.jsonBody}");
-} else {
-  // that's ok
-}
 ```
 
 # APIs
@@ -174,10 +163,11 @@ static Future<AuthResult?> logout() async
 
 ### Get Captcha
 ```dart
-static Future<CaptchaResult> getCaptcha() async {
+static Future<CaptchaResult> getCaptcha() async
 ```
 
 ### Send verification code
+If method is empty or not `method`, casdoor server will check user is exists.
 ```dart
 static Future<AuthResult> sendCode(
   String dest, {
@@ -186,12 +176,13 @@ static Future<AuthResult> sendCode(
   String? checkKey = "",
   String? checkType = "none",
   String? checkUser = "",
+  String? method = "signup",
 }) async
 ```
 
 ### Fetch current user info
 ```dart
-static Future<void> userInfo() async
+static Future<User?> userInfo() async
 ```
 
 # License
