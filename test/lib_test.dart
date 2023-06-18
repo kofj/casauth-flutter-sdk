@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:casauth/casauth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mysql_client/mysql_client.dart';
@@ -12,7 +13,18 @@ import 'package:mysql_client/mysql_client.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const int dbPort = 3306;
+  const String appName =
+      String.fromEnvironment("CAS_APPNAME", defaultValue: "testapp");
+  const String appId =
+      String.fromEnvironment("CAS_APPID", defaultValue: "45bcc334a4ca4b0b6eaf");
+  const String server = String.fromEnvironment("CAS_SERVER",
+      defaultValue: "http://localhost:8000");
+  const String orgnazationName =
+      String.fromEnvironment("CAS_ORG_NAME", defaultValue: "dev");
+
+  CASAuth(appName, appId, server, orgnazationName);
+
+  const int dbPort = int.fromEnvironment("UT_MYSQL_PORT", defaultValue: 3306);
   const String dbHost =
       String.fromEnvironment("UT_MYSQL_HOST", defaultValue: "mysql.");
   const String dbUser = "root";
@@ -48,5 +60,15 @@ void main() {
     await db?.close();
 
     debugPrint("----------- tear down -----------\n\n");
+  });
+
+  test('test config', () async {
+    var cfg = CASAuth.appConfig;
+    expect(cfg.name, appName);
+    expect(cfg.owner, "admin");
+    expect(cfg.clientId, appId);
+    expect(cfg.organization, orgnazationName);
+
+    debugPrint("🔥 appConfig: $cfg");
   });
 }

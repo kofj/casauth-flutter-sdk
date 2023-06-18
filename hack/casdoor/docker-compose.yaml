@@ -39,7 +39,7 @@ services:
   flutter:
     restart: always
     working_dir: /workspace/
-    image: mobiledevops/flutter-sdk-image:3.10.1
+    image: ghcr.io/cirruslabs/flutter:3.10.5
     container_name: casdoor.flutter
     entrypoint: /bin/sh -c 'sleep 7200000'
     depends_on:

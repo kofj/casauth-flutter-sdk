@@ -13,6 +13,9 @@ dumpsql:
 casdoor-isup:
 	@bash hack/casdoor/isup.sh
 
+unit-test-linux:
+	flutter pub get && flutter test --dart-define=CAS_SERVER=http://localhost:8000 --dart-define=UT_MYSQL_HOST=localhost --dart-define=UT_MYSQL_PORT=23306
+
 unit-test: casdoor-isup
 	@docker ps
 	@docker exec -t casdoor.flutter bash -c 'flutter pub get && flutter test --dart-define=CAS_SERVER=http://casdoor:8000'
