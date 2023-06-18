@@ -1,0 +1,70 @@
+version: "3.1"
+services:
+  casdoor:
+    restart: always
+    image: casbin/casdoor:v1.308.0
+    container_name: casdoor.server
+    entrypoint: /bin/sh -c 'sleep 30 && ./server --createDatabase=true'
+    ports:
+      - "0.0.0.0:8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    depends_on:
+      - mysql
+    environment:
+      RUNNING_IN_DOCKER: "true"
+    volumes:
+      - ./conf:/conf/
+  mysql:
+    restart: always
+    image: mysql:8.0.31
+    platform: linux/amd64
+    container_name: casdoor.mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", -p"JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    ports:
+      - "23306:3306"
+    environment:
+      MYSQL_DATABASE: casdoor
+      MYSQL_ROOT_PASSWORD: JKGgWFf9XTW+FRhamg+T2Xht8e9S12MK
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+
+  flutter:
+    restart: always
+    working_dir: /workspace/
+    image: mobiledevops/flutter-sdk-image:3.10.1
+    container_name: casdoor.flutter
+    entrypoint: /bin/sh -c 'sleep 7200000'
+    depends_on:
+      - mysql
+      - casdoor
+    environment:
+      CAS_SERVER: http://casdoor:8000
+      PUB_HOSTED_URL: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub"
+      FLUTTER_STORAGE_BASE_URL: "https://mirrors.tuna.tsinghua.edu.cn/flutter"
+    volumes:
+      - ../../:/workspace/
+  smtp:
+    restart: always
+    image: mailhog/mailhog
+    container_name: casdoor.smtp
+    ports:
+      - "0.0.0.0:8025:8025"
+      - "0.0.0.0:1025:1025"
+    depends_on:
+      - mysql
+      - casdoor
+  # debug:
+  #   image: jdecool/mycli
+  #   entrypoint: /bin/sh -c 'sleep 99999'
+  #   depends_on:
+  #     - mysql
+  #   environment:
+  #     RUNNING_IN_DOCKER: "true"

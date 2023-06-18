@@ -1,0 +1,40 @@
+name: CASAuth SDK CICD
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  pull_request_ci:
+    if: ${{ github.event.pull_request }}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Cache Container Images
+        id: cache-container-images
+        uses: jamesmortensen/cache-container-images-action@v1
+        with:
+          images: |
+            mysql:8.0.25
+            casbin/casdoor:v1.79.0
+            mobiledevops/flutter-sdk-image:3.10.1
+            mailhog/mailhog:latest
+
+      - name: Start Local Casdoor
+        run: make start-casdoor
+
+      - name: Run Unit Tests
+        run: make unit-test
