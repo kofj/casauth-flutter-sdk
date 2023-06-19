@@ -1,22 +1,51 @@
 library casauth;
 
 import 'dart:io';
-
+import 'dart:convert';
+import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:stash/stash_api.dart';
 import 'package:stash_sqlite/stash_sqlite.dart';
+import 'package:http/http.dart' as http;
 
-import 'config.dart';
-import 'errors.dart';
+part './config.dart';
+part './errors.dart';
+part './vault.dart';
+part './user.dart';
+part './http.dart';
+
+late CASAuth casauth;
+
+Future<void> init(
+  appName,
+  appID,
+  serverAddress,
+  organizationName, {
+  Vault? vault,
+  String? userPrefix,
+}) async {
+  casauth = CASAuth(
+    appName,
+    appID,
+    serverAddress,
+    organizationName,
+    defaultVault: vault,
+    userPrefix: userPrefix,
+  );
+  await casauth.init();
+}
 
 class CASAuth {
-  static Vault? defaultVault;
-  static String app = "";
-  static String appId = "";
-  static String server = "";
-  static String organization = "";
-  static String version = "2.0.0";
-  static String randomUsernamePrefix = "mobile_";
-  static AppConfig appConfig = configFromJson("{}");
+  Vault? vault;
+  String app = "";
+  String appId = "";
+  String server = "";
+  String organization = "";
+  String version = "2.0.0";
+  String randomUsernamePrefix = "mobile_";
+  AppConfig? appConfig;
+
+  String? _token;
 
   @override
   String toString() {
@@ -28,41 +57,39 @@ class CASAuth {
     appID,
     serverAddress,
     organizationName, {
-    Vault? vault,
+    Vault? defaultVault,
     String? userPrefix,
   }) {
     app = appName;
     appId = appID;
     server = serverAddress;
     organization = organizationName;
+    randomUsernamePrefix = userPrefix ?? randomUsernamePrefix;
+    vault = defaultVault;
+  }
 
-    Future.delayed(Duration.zero, () async {
-      // 1. init vault store. used for store session, user info.
-      if (vault == null) {
-        final dbPath = "${Directory.current.path}/Data/casauth.db";
-        final file = File(dbPath);
+  Future<void> init() async {
+    // 1. fetch app config from server.
+    appConfig = await fetchAppConfig();
 
-        final store = await newSqliteLocalVaultStore(file: file);
-        vault = await store.vault(name: "casauth");
-      }
+    if (appConfig?.getGrantTokenType() == "") {
+      throw CASAuthError(ErrorLevel.fatal,
+          "Application's OAuth grantTypes must has token and/or id_token");
+    }
 
-      if (vault == null) {
-        throw CASAuthError(ErrorLevel.fatal, "vault is null");
-      }
+    // 2. init vault store. used for store session, user info.
+    if (vault == null) {
+      final dbPath = "${Directory.current.path}/Data/casauth.db";
+      final file = File(dbPath);
 
-      defaultVault = vault;
+      final store = await newSqliteLocalVaultStore(file: file);
+      vault = await store.vault(name: "casauth");
+    }
+    if (vault == null) {
+      throw CASAuthError(ErrorLevel.fatal, "vault is null");
+    }
 
-      if (userPrefix != null) {
-        randomUsernamePrefix = userPrefix;
-      }
-
-      // 2. fetch app config from server.
-      appConfig = await fetchAppConfig();
-
-      if (appConfig.getGrantTokenType() == "") {
-        throw CASAuthError(ErrorLevel.fatal,
-            "Application's OAuth grantTypes must has token and/or id_token");
-      }
-    });
+    // 3. load user info from vault.
+    _token = await vault?.get("token");
   }
 }

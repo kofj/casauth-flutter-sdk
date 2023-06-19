@@ -22,8 +22,6 @@ void main() {
   const String orgnazationName =
       String.fromEnvironment("CAS_ORG_NAME", defaultValue: "dev");
 
-  CASAuth(appName, appId, server, orgnazationName);
-
   const int dbPort = int.fromEnvironment("UT_MYSQL_PORT", defaultValue: 3306);
   const String dbHost =
       String.fromEnvironment("UT_MYSQL_HOST", defaultValue: "mysql.");
@@ -62,13 +60,26 @@ void main() {
     debugPrint("----------- tear down -----------\n\n");
   });
 
-  test('test config', () async {
-    var cfg = CASAuth.appConfig;
-    expect(cfg.name, appName);
-    expect(cfg.owner, "admin");
-    expect(cfg.clientId, appId);
-    expect(cfg.organization, orgnazationName);
+  test("config fatal failed", () {
+    expect(
+      CASAuth("appName", appId, server, orgnazationName).init(),
+      throwsA(
+        predicate(
+          (x) => x is CASAuthError && x.level == ErrorLevel.fatal,
+        ),
+      ),
+    );
+  });
 
+  test('test config success', () async {
+    await init(appName, appId, server, orgnazationName);
+
+    var cfg = casauth.appConfig;
     debugPrint("🔥 appConfig: $cfg");
+
+    expect(cfg?.name, appName);
+    expect(cfg?.owner, "admin");
+    expect(cfg?.clientId, appId);
+    expect(cfg?.organization, orgnazationName);
   });
 }
