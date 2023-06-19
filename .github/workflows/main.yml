@@ -13,6 +13,14 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  code_cov:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   pull_request_ci:
     if: ${{ github.event.pull_request }}
     # The type of runner that the job will run on
