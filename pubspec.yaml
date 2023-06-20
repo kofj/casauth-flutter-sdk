@@ -20,6 +20,7 @@ dependencies:
   http: ^1.0.0
   stash: ^4.5.3
   stash_sqlite: ^4.6.2
+  xid: ^1.0.12
 
 dev_dependencies:
   flutter_test:

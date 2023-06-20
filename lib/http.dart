@@ -26,7 +26,6 @@ extension HttpReq on CASAuth {
     if (resp.code == 200 && resp.message == "Access token doesn't exist") {
       await clearCache();
       debugPrint("token not exist, clear cache");
-      throw CASAuthError(ErrorLevel.error, "Access token doesn't exist");
     }
 
     return resp;

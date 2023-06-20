@@ -304,5 +304,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  xid:
+    dependency: "direct main"
+    description:
+      name: xid
+      sha256: "7ade0e857bac6f17337a41e37e399c13291c0b721634d7f5637d21c1ae6f3ecd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.12"
 sdks:
   dart: ">=3.0.5 <4.0.0"
