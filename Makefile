@@ -19,3 +19,6 @@ unit-test: casdoor-isup
 
 host-ut: casdoor-isup
 	@flutter pub get && flutter test --dart-define=UT_MYSQL_HOST=localhost
+
+publish:
+	@flutter pub publish --server https://pub.dev/
