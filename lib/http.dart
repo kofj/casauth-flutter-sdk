@@ -53,7 +53,7 @@ extension HttpReq on CASAuth {
       headers["content-type"] = "application/json";
     }
 
-    if (await isLogin) {
+    if (isLogin) {
       headers["Authorization"] = "Bearer $token";
     }
 
