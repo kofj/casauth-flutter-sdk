@@ -5,10 +5,13 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:math';
+
 import 'package:casauth/casauth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mysql_client/mysql_client.dart';
+import 'package:xid/xid.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,6 +63,12 @@ void main() {
     debugPrint("----------- tear down -----------\n\n");
   });
 
+  logout() async {
+    var resp = await casauth.logout();
+    expect(resp.code, 200);
+    expect(casauth.token, isEmpty);
+  }
+
   test("config fatal failed", () {
     expect(
       CASAuth("appName", appId, server, orgnazationName).init(),
@@ -83,12 +92,57 @@ void main() {
     expect(cfg?.organization, orgnazationName);
   });
 
+  group("register", () {
+    var id = Xid().toString();
+    var email = "$id@kofj.net";
+    test("by email", () async {
+      AuthResult resp = await casauth.sendCode(email, type: AccountType.email);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      var resp2 = await casauth.registerByEmail(
+        email,
+        code,
+        username: id,
+        password: id,
+      );
+
+      expect(resp2.code, 200);
+    });
+
+    test("verify email register", () async {
+      // verify email login
+      var resp = await casauth.loginByAccount(email, id);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+      await logout();
+
+      // verify username login
+      resp = await casauth.loginByAccount(id, id);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+      await logout();
+    });
+  });
+
   group("login", () {
     test("loginByAccount() by email success", () async {
       var resp = await casauth.loginByAccount("me@kofj.net", "casauth");
       expect(resp.code, 200);
       expect(resp.status, "ok");
       expect(casauth.token, isNotEmpty);
+      await logout();
     });
 
     test("loginByAccount() by name success", () async {
@@ -96,10 +150,12 @@ void main() {
       expect(resp.code, 200);
       expect(resp.status, "ok");
       expect(casauth.token, isNotEmpty);
+      await logout();
     });
   });
 
-  test("logout", () async {
+  test("logout faild", () async {
+    await casauth.setToken("token");
     var resp = await casauth.logout();
     expect(resp.code, 200);
     expect(casauth.token, isEmpty);

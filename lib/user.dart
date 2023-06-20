@@ -17,24 +17,26 @@ extension UserMethods on CASAuth {
   }
 
   Future logout() async {
+    if (token == null || token!.isEmpty) {
+      return AuthResult(200);
+    }
     AuthResult resp = await get(
         '/api/logout?id_token_hint=$token&post_logout_redirect_uri=$redirectUri');
 
     if (resp.code == 200 && resp.jsonBody?["status"] == "error") {
-      debugPrint("🔥 server error: ${resp.jsonBody?["msg"]}");
+      debugPrint("⚠️  server error: ${resp.jsonBody?["msg"]}, token: $token");
       _token = "";
-      await vault?.remove("user");
-      await vault?.remove("token");
+      await clearCache();
     }
 
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
-      debugPrint("🔥 success");
+      debugPrint("⚠️  success");
       _token = "";
       await vault?.remove("user");
       await vault?.remove("token");
     }
 
-    debugPrint("🔥 logout ${resp.code}, body: ${resp.jsonBody}");
+    debugPrint("⚠️  logout ${resp.code}, body: ${resp.jsonBody}");
     return resp;
   }
 
@@ -74,6 +76,97 @@ extension UserMethods on CASAuth {
     }
 
     return resp;
+  }
+
+  Future<AuthResult> sendCode(
+    String dest, {
+    String? checkUser = "",
+    String? method = "signup",
+    String? countryCode = "86",
+    String? captchaType = "none",
+    AccountType? type = AccountType.phone,
+  }) async {
+    if (type != AccountType.phone && type != AccountType.email) {
+      throw CASAuthError(ErrorLevel.error, "invalid account type");
+    }
+
+    if (isLogin) {
+      log("token is not empty, logout before login");
+      await logout();
+    }
+
+    String body =
+        "applicationId=admin/$app&method=$method&captchaType=$captchaType&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
+    Map<String, String> extHeader = {
+      "content-type": "application/x-www-form-urlencoded"
+    };
+
+    var resp = await post("/api/send-verification-code", body, extHeader);
+    if (resp.code != 200) {
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${resp.code}");
+    }
+    if (resp.status == "error") {
+      throw CASAuthError(ErrorLevel.error, resp.message!);
+    }
+    return resp;
+  }
+
+  Future<AuthResult> registerByEmail(
+    String email,
+    String code, {
+    String username = '',
+    String password = '',
+    String displayName = '',
+  }) async {
+    var requiredString = Xid().toString();
+    if (username.isEmpty && appConfig!.requiredSignupUsername) {
+      username = requiredString;
+    }
+    if (appConfig!.requiredSignupDisplayName || displayName.isEmpty) {
+      displayName = email;
+    }
+
+    if (password.isEmpty && appConfig!.requiredSignupPassword) {
+      password = requiredString;
+    }
+
+    var payload = jsonEncode({
+      'email': email,
+      'emailCode': code,
+      'username': username,
+      'name': displayName,
+      'password': password,
+      'appId': appId,
+      'application': app,
+      'organization': organization,
+    });
+    debugPrint("🔥 registerByEmail payload: $payload");
+    AuthResult response = await post('/api/signup', payload);
+
+    if (response.code != 200) {
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${response.code}");
+    }
+
+    if (response.status == "error") {
+      switch (response.message) {
+        // case "Code has not been sent yet!":
+        //   throw CASAuthError(ErrorLevel.warn, "email code required");
+
+        default:
+          throw CASAuthError(ErrorLevel.error, response.message!);
+      }
+    }
+    return response;
+  }
+}
+
+enum AccountType { username, phone, email }
+
+extension ParseToString on AccountType {
+  String toShortString() {
+    return name;
   }
 }
 

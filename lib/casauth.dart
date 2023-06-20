@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:stash/stash_api.dart';
 import 'package:stash_sqlite/stash_sqlite.dart';
 import 'package:http/http.dart' as http;
+import 'package:xid/xid.dart';
 
 part './config.dart';
 part './errors.dart';
