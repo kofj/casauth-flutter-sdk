@@ -161,6 +161,7 @@ void main() {
 
   group("recovery password | ", () {
     var username = "recovery";
+    var password = Xid().toString();
     var email = "recovery@example.com";
     test("check account not exist", () {
       expect(
@@ -195,8 +196,16 @@ void main() {
       );
     });
 
-    test("recovery", () async {
-      AuthResult resp = await casauth.sendCode(email, type: AccountType.email);
+    test("set password", () async {
+      // 1. get emailAndPhone
+      var info = await casauth.getEmailAndPhone(email);
+      expect(info.email, email);
+      expect(info.name, username);
+      debugPrint("🔥 emailAndPhone: ${info.name},${info.email},${info.phone}");
+
+      // 2. send code
+      AuthResult resp = await casauth.sendCode(email,
+          type: AccountType.email, method: "forget");
       expect(resp.code, 200,
           reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
       expect(resp.status, "ok",
@@ -205,11 +214,29 @@ void main() {
         "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
       );
       String code = query.rows.first.colByName("code")!;
+      debugPrint("🔥 code: $code");
       expect(query.affectedRows, BigInt.zero);
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);
 
-      expect(await casauth.verifyCode(email, code), isTrue);
+      // 3. verify code
+      var (verified, cookie) = await casauth.verifyCode(email, code);
+      expect(verified, isTrue);
+      expect(cookie, isNotEmpty);
+
+      // 4. reset password
+      resp = await casauth.setPassword(info.name, code, password, cookie);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+
+      // 5. check changes
+      resp = await casauth.loginByAccount(email, password);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+
+      // 6. logout
+      await logout();
     });
   });
 }

@@ -6,6 +6,7 @@ class AuthResult {
   late String? message = "";
   late Map<String, dynamic>? jsonBody;
   late List<dynamic>? listBody;
+  late String? cookie;
 
   AuthResult(int respCode,
       {String? respStatus, String? respMessage, Map<String, dynamic>? body}) {
@@ -18,10 +19,11 @@ class AuthResult {
 
 extension HttpReq on CASAuth {
   Future<AuthResult> get(String endpoint,
-      {Map<String, String>? extHeaders}) async {
+      {Map<String, String>? extHeaders, String? cookie}) async {
     String url = server + endpoint;
 
-    AuthResult resp = await request("get", url, null, extHeaders);
+    AuthResult resp = await request("get", url,
+        body: null, extHeaders: extHeaders, cookie: cookie);
 
     if (resp.code == 200 && resp.message == "Access token doesn't exist") {
       await clearCache();
@@ -32,13 +34,14 @@ extension HttpReq on CASAuth {
   }
 
   Future<AuthResult> post(String endpoint,
-      [String? body, Map<String, String>? extHeaders]) async {
+      {String? body, Map<String, String>? extHeaders, String? cookie}) async {
     String url = server + endpoint;
-    return request("post", url, body, extHeaders);
+    return request("post", url,
+        body: body, extHeaders: extHeaders, cookie: cookie);
   }
 
   Future<AuthResult> request(String method, String uri,
-      [String? body, Map<String, String>? extHeaders]) async {
+      {String? body, Map<String, String>? extHeaders, String? cookie}) async {
     var url = Uri.parse(uri);
     Map<String, String> headers = {
       "x-app-id": appId,
@@ -54,6 +57,10 @@ extension HttpReq on CASAuth {
 
     if (isLogin) {
       headers["Authorization"] = "Bearer $token";
+    }
+
+    if (cookie != null && cookie != "") {
+      headers["Cookie"] = cookie;
     }
 
     method = method.toLowerCase();
@@ -89,6 +96,10 @@ extension HttpReq on CASAuth {
       result.jsonBody = data;
       result.status = data['status'];
       result.message = data['msg'];
+    }
+
+    if (resp.headers['set-cookie'] != null) {
+      result.cookie = resp.headers['set-cookie'];
     }
 
     return result;

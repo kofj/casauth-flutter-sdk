@@ -60,7 +60,7 @@ extension UserMethods on CASAuth {
       await logout();
     }
 
-    AuthResult resp = await post('/api/login', payload);
+    AuthResult resp = await post('/api/login', body: payload);
     if (resp.code != 200) {
       throw CASAuthError(
           ErrorLevel.error, "server failed, http code: ${resp.code}");
@@ -108,7 +108,7 @@ extension UserMethods on CASAuth {
       'organization': organization,
     });
     debugPrint("🔥 registerByEmail payload: $payload");
-    AuthResult response = await post('/api/signup', payload);
+    AuthResult response = await post('/api/signup', body: payload);
 
     if (response.code != 200) {
       throw CASAuthError(
@@ -144,6 +144,7 @@ extension UserMethods on CASAuth {
     if (response.status == "error") {
       throw CASAuthError(ErrorLevel.error, response.message!);
     }
+    debugPrint("🔥 getEmailAndPhone by $account: ${response.message}");
     return UserEmailPhone.fromJson(response.jsonBody?['data']);
   }
 }
@@ -157,10 +158,10 @@ extension ParseToString on AccountType {
 }
 
 class UserEmailPhone {
-  String? name;
+  String name = "";
   String? email;
   String? phone;
-  UserEmailPhone({this.name, this.email, this.phone});
+  UserEmailPhone({this.name = "", this.email, this.phone});
   UserEmailPhone.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     email = json['email'];
