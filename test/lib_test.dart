@@ -159,17 +159,40 @@ void main() {
     expect(casauth.token, isEmpty);
   });
 
-  group("recovery password", () {
+  group("recovery password | ", () {
     var username = "recovery";
     var email = "recovery@example.com";
-    test("check account not exist", () async {
-      expect(await casauth.getEmailAndPhone("niluser"), false);
+    test("check account not exist", () {
+      expect(
+        casauth.getEmailAndPhone("niluser"),
+        throwsA(
+          predicate(
+            (x) =>
+                x is CASAuthError &&
+                x.level == ErrorLevel.error &&
+                x.message == "user not exist",
+          ),
+        ),
+        reason: "user not exist, should throw error",
+      );
     });
+
     test("chceck account usernmae exist", () async {
-      expect(await casauth.getEmailAndPhone(username), isTrue);
+      expect(
+        await casauth.getEmailAndPhone(username),
+        predicate(
+          (x) => x is UserEmailPhone && x.name == username,
+        ),
+      );
     });
+
     test("chceck account email exist", () async {
-      expect(await casauth.getEmailAndPhone(email), isTrue);
+      expect(
+        await casauth.getEmailAndPhone(email),
+        predicate(
+          (x) => x is UserEmailPhone && x.name == username && x.email == email,
+        ),
+      );
     });
 
     test("recovery", () async {

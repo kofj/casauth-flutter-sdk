@@ -127,7 +127,7 @@ extension UserMethods on CASAuth {
     return response;
   }
 
-  Future<bool> getEmailAndPhone(String account) async {
+  Future<UserEmailPhone> getEmailAndPhone(String account) async {
     AuthResult response = await get(
         "/api/get-email-and-phone?organization=dev&username=$account");
 
@@ -138,13 +138,13 @@ extension UserMethods on CASAuth {
 
     if (response.status == "error" &&
         response.message == "The user: $organization/$account doesn't exist") {
-      return false;
+      throw CASAuthError(ErrorLevel.error, "user not exist");
     }
 
     if (response.status == "error") {
       throw CASAuthError(ErrorLevel.error, response.message!);
     }
-    return response.status == "ok";
+    return UserEmailPhone.fromJson(response.jsonBody?['data']);
   }
 }
 
@@ -153,6 +153,18 @@ enum AccountType { username, phone, email }
 extension ParseToString on AccountType {
   String toShortString() {
     return name;
+  }
+}
+
+class UserEmailPhone {
+  String? name;
+  String? email;
+  String? phone;
+  UserEmailPhone({this.name, this.email, this.phone});
+  UserEmailPhone.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    email = json['email'];
+    phone = json['phone'];
   }
 }
 
