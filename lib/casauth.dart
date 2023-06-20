@@ -23,6 +23,7 @@ Future<void> init(
   organizationName, {
   Vault? vault,
   String? userPrefix,
+  String? redirectUri,
 }) async {
   casauth = CASAuth(
     appName,
@@ -31,6 +32,7 @@ Future<void> init(
     organizationName,
     defaultVault: vault,
     userPrefix: userPrefix,
+    redirectUri: redirectUri,
   );
   await casauth.init();
 }
@@ -42,6 +44,7 @@ class CASAuth {
   String server = "";
   String organization = "";
   String version = "2.0.0";
+  String redirectUri = "casauth";
   String randomUsernamePrefix = "mobile_";
   AppConfig? appConfig;
 
@@ -60,11 +63,13 @@ class CASAuth {
     organizationName, {
     Vault? defaultVault,
     String? userPrefix,
+    String? redirectUri,
   }) {
     app = appName;
     appId = appID;
     server = serverAddress;
     organization = organizationName;
+    this.redirectUri = redirectUri ?? this.redirectUri;
     randomUsernamePrefix = userPrefix ?? randomUsernamePrefix;
     vault = defaultVault;
   }

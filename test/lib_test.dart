@@ -84,8 +84,15 @@ void main() {
   });
 
   group("login", () {
-    test("loginByAccount() success", () async {
+    test("loginByAccount() by email success", () async {
       var resp = await casauth.loginByAccount("me@kofj.net", "casauth");
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+    });
+
+    test("loginByAccount() by name success", () async {
+      var resp = await casauth.loginByAccount("casauth", "casauth");
       expect(resp.code, 200);
       expect(resp.status, "ok");
       expect(casauth.token, isNotEmpty);

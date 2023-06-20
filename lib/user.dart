@@ -17,20 +17,24 @@ extension UserMethods on CASAuth {
   }
 
   Future logout() async {
-    AuthResult resp = await get('/api/login/oauth/logout?id_token_hint=$token');
+    AuthResult resp = await get(
+        '/api/logout?id_token_hint=$token&post_logout_redirect_uri=$redirectUri');
 
-    if (
-        // case 1: token exists, response 200
-        // case 2: token not exists, response 404
-        // (resp.code == 404))
-        resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
-      // await clearCache();
+    if (resp.code == 200 && resp.jsonBody?["status"] == "error") {
+      debugPrint("🔥 server error: ${resp.jsonBody?["msg"]}");
+      _token = "";
       await vault?.remove("user");
       await vault?.remove("token");
-      return resp;
     }
 
-    debugPrint("🔥 ${resp.code}, body: ${resp.jsonBody}");
+    if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
+      debugPrint("🔥 success");
+      _token = "";
+      await vault?.remove("user");
+      await vault?.remove("token");
+    }
+
+    debugPrint("🔥 logout ${resp.code}, body: ${resp.jsonBody}");
     return resp;
   }
 
