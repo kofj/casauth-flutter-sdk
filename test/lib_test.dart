@@ -82,4 +82,19 @@ void main() {
     expect(cfg?.clientId, appId);
     expect(cfg?.organization, orgnazationName);
   });
+
+  group("login", () {
+    test("loginByAccount() success", () async {
+      var resp = await casauth.loginByAccount("me@kofj.net", "casauth");
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+    });
+  });
+
+  test("logout", () async {
+    var resp = await casauth.logout();
+    expect(resp.code, 200);
+    expect(casauth.token, isEmpty);
+  });
 }

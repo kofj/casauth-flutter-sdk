@@ -46,6 +46,7 @@ class CASAuth {
   AppConfig? appConfig;
 
   String? _token;
+  User? _user;
 
   @override
   String toString() {
@@ -91,5 +92,9 @@ class CASAuth {
 
     // 3. load user info from vault.
     _token = await vault?.get("token");
+    var userJson = await vault?.get("user");
+    if (userJson != null) {
+      _user = User.fromJson(jsonDecode(userJson));
+    }
   }
 }
