@@ -160,6 +160,26 @@ extension UserMethods on CASAuth {
     }
     return response;
   }
+
+  Future<bool> getEmailAndPhone(String account) async {
+    AuthResult response = await get(
+        "/api/get-email-and-phone?organization=dev&username=$account");
+
+    if (response.code != 200) {
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${response.code}");
+    }
+
+    if (response.status == "error" &&
+        response.message == "The user: $organization/$account doesn't exist") {
+      return false;
+    }
+
+    if (response.status == "error") {
+      throw CASAuthError(ErrorLevel.error, response.message!);
+    }
+    return response.status == "ok";
+  }
 }
 
 enum AccountType { username, phone, email }

@@ -158,4 +158,18 @@ void main() {
     expect(resp.code, 200);
     expect(casauth.token, isEmpty);
   });
+
+  group("recovery password", () {
+    var username = "recovery";
+    var email = "recovery@example.com";
+    test("check account not exist", () async {
+      expect(await casauth.getEmailAndPhone("niluser"), false);
+    });
+    test("chceck account usernmae exist", () async {
+      expect(await casauth.getEmailAndPhone(username), isTrue);
+    });
+    test("chceck account email exist", () async {
+      expect(await casauth.getEmailAndPhone(email), isTrue);
+    });
+  });
 }
