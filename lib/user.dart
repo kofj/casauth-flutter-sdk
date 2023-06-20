@@ -1,6 +1,11 @@
-import 'package:casauth/casauth.dart';
+part of casauth;
 
-extension User on CASAuth {
-  String get token => "";
-  bool get isLogin => false;
+extension UserMethods on CASAuth {
+  String? get token => _token;
+  Future<void> setToken(String? token) async {
+    _token = token;
+    await vault?.put("token", token);
+  }
+
+  bool get isLogin => token != null && token != "";
 }

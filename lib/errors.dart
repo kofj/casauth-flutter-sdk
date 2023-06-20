@@ -1,3 +1,5 @@
+part of casauth;
+
 enum ErrorLevel {
   warn,
   error,

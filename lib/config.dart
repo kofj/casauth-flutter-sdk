@@ -1,32 +1,35 @@
-library casauth;
-
-import 'dart:convert';
-import 'dart:developer';
-import 'package:casauth/casauth.dart';
-import 'package:http/http.dart';
+part of casauth;
 
 AppConfig configFromJson(String str) => AppConfig.fromJson(json.decode(str));
 
 String configToJson(AppConfig data) => json.encode(data.toJson());
 
-// retrieve application config from server
-Future<AppConfig> fetchAppConfig() async {
-  var url = Uri.parse(
-      "${CASAuth.server}/api/get-application?id=admin/${CASAuth.app}");
-  Map<String, String> headers = {
-    "x-app-id": CASAuth.appId,
-    "x-request-from": "casauth-sdk-flutter",
-    "x-casauth-sdk-version": CASAuth.version,
-    "content-type": "application/json",
-  };
+extension FetchAppConfig on CASAuth {
+  // retrieve application config from server
+  Future<AppConfig> fetchAppConfig() async {
+    Map<String, String> headers = {
+      "x-app-id": appId,
+      "x-request-from": "casauth-sdk-flutter",
+      "x-casauth-sdk-version": version,
+      "content-type": "application/json",
+    };
 
-  var resp = await get(url, headers: headers);
-  if (resp.statusCode != 200) {
-    log("init config failed: code=${resp.statusCode}/body=${resp.body}");
-    throw Exception(
-        "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
+    var endpoint = Uri.parse("$server/api/get-application?id=admin/$app");
+    debugPrint("fetch app config → $endpoint");
+
+    var resp = await http.get(endpoint, headers: headers);
+    debugPrint("fetch app config ← ${resp.statusCode}");
+    if (resp.statusCode != 200) {
+      log("init config failed: code=${resp.statusCode}/body=${resp.body.length} bytes");
+      throw CASAuthError(ErrorLevel.fatal,
+          "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
+    }
+    if (resp.body == "null" || resp.body.isEmpty) {
+      throw CASAuthError(ErrorLevel.fatal,
+          "Failed to retrieve application config. body is empty");
+    }
+    return configFromJson(resp.body);
   }
-  return configFromJson(resp.body);
 }
 
 class AppConfig {

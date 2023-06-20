@@ -1,11 +1,4 @@
-import 'dart:convert';
-
-import 'package:casauth/vault.dart';
-import 'package:http/http.dart' as http;
-import 'package:casauth/errors.dart';
-import 'package:casauth/casauth.dart';
-import 'package:casauth/user.dart';
-import 'package:flutter/material.dart';
+part of "casauth.dart";
 
 class AuthResult {
   late int code;
@@ -23,10 +16,10 @@ class AuthResult {
   }
 }
 
-extension Http on CASAuth {
+extension HttpReq on CASAuth {
   Future<AuthResult> get(String endpoint,
       {Map<String, String>? extHeaders}) async {
-    String url = CASAuth.server + endpoint;
+    String url = server + endpoint;
 
     AuthResult resp = await request("get", url, null, extHeaders);
 
@@ -41,7 +34,7 @@ extension Http on CASAuth {
 
   Future<AuthResult> post(String endpoint,
       [String? body, Map<String, String>? extHeaders]) async {
-    String url = CASAuth.server + endpoint;
+    String url = server + endpoint;
     return request("post", url, body, extHeaders);
   }
 
@@ -49,9 +42,9 @@ extension Http on CASAuth {
       [String? body, Map<String, String>? extHeaders]) async {
     var url = Uri.parse(uri);
     Map<String, String> headers = {
-      "x-app-id": CASAuth.appId,
+      "x-app-id": appId,
       "x-request-from": "casauth-sdk-flutter",
-      "x-casauth-sdk-version": CASAuth.version,
+      "x-casauth-sdk-version": version,
     };
     if (extHeaders != null) {
       headers.addAll(extHeaders);
@@ -60,7 +53,7 @@ extension Http on CASAuth {
       headers["content-type"] = "application/json";
     }
 
-    if (isLogin) {
+    if (await isLogin) {
       headers["Authorization"] = "Bearer $token";
     }
 

@@ -1,0 +1,7 @@
+{
+    "dart.flutterTestAdditionalArgs": [
+        "--dart-define=CAS_SERVER=http://localhost:8000",
+        "--dart-define=UT_MYSQL_HOST=localhost",
+        "--dart-define=UT_MYSQL_PORT=23306"
+    ]
+}

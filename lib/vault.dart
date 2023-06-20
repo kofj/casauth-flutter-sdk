@@ -1,7 +1,7 @@
-import 'package:casauth/casauth.dart';
+part of casauth;
 
-extension Vault on CASAuth {
+extension CasVault on CASAuth {
   Future<void> clearCache() async {
-    await CASAuth.defaultVault?.clear();
+    await vault?.clear();
   }
 }
