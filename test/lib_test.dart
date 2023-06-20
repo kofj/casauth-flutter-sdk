@@ -171,5 +171,22 @@ void main() {
     test("chceck account email exist", () async {
       expect(await casauth.getEmailAndPhone(email), isTrue);
     });
+
+    test("recovery", () async {
+      AuthResult resp = await casauth.sendCode(email, type: AccountType.email);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      expect(await casauth.verifyCode(email, code), isTrue);
+    });
   });
 }
