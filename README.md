@@ -26,7 +26,7 @@ You need install self's casdoor first. And I only test this SDK with a little ve
 | v1.1.0 |  ✅ v1.97.0 | - |
 | v1.1.0 |  ✅ v1.123.0 | - |
 | v1.2.0 |  ✅ v1.223.0 | - |
-| v2.0.0 |  ✅ v1.308.0 | - |
+| v2.0.0 |  ✅ v1.308.0 | ✅ v1.344.0 |
 
 
 ## Quick Start
@@ -67,14 +67,47 @@ try {
   AuthResult resp = await casauth.sendCode(email, type: AccountType.email);
 } catch (e) {
   debugPrint("send code failed");
+  print("error level: ${err.level}, message: ${err.message}");
 }
 ```
 
 ### Signup/Register by email
 ```dart
 try {
-  await casauth.registerByEmail(email, code, username: id, password: id);
-} catch (e) {
+  AuthResult resp = await casauth.registerByEmail(email, code, username: id, password: id);
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
   debugPrint("register user failed");
+  print("error level: ${err.level}, message: ${err.message}");
 }
+```
+
+### Login by account
+You can login with account, includes username/email/phone.
+```dart
+var email = "me@example.com";
+var username = "me_example_com";
+var password = "your_strong_password";
+try {
+  // email login
+  AuthResult resp = await casauth.loginByAccount(email, password);
+  // username login
+  // resp = await casauth.loginByAccount(username, password);
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
+  print("error level: ${err.level}, message: ${err.message}");
+}
+```
+
+### Logout
+We call `/api/logout` to revoke the JWT token. You'll always see the token in Casdoor, which expires in 0s. 
+
+```dart
+try {
+  AuthResult resp = await casauth.logout();
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
+  print("error level: ${err.level}, message: ${err.message}");
+}
+
 ```
