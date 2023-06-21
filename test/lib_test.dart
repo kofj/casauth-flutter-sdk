@@ -158,4 +158,85 @@ void main() {
     expect(resp.code, 200);
     expect(casauth.token, isEmpty);
   });
+
+  group("recovery password | ", () {
+    var username = "recovery";
+    var password = Xid().toString();
+    var email = "recovery@example.com";
+    test("check account not exist", () {
+      expect(
+        casauth.getEmailAndPhone("niluser"),
+        throwsA(
+          predicate(
+            (x) =>
+                x is CASAuthError &&
+                x.level == ErrorLevel.error &&
+                x.message == "user not exist",
+          ),
+        ),
+        reason: "user not exist, should throw error",
+      );
+    });
+
+    test("chceck account usernmae exist", () async {
+      expect(
+        await casauth.getEmailAndPhone(username),
+        predicate(
+          (x) => x is UserEmailPhone && x.name == username,
+        ),
+      );
+    });
+
+    test("chceck account email exist", () async {
+      expect(
+        await casauth.getEmailAndPhone(email),
+        predicate(
+          (x) => x is UserEmailPhone && x.name == username && x.email == email,
+        ),
+      );
+    });
+
+    test("set password", () async {
+      // 1. get emailAndPhone
+      var info = await casauth.getEmailAndPhone(email);
+      expect(info.email, email);
+      expect(info.name, username);
+      debugPrint("🔥 emailAndPhone: ${info.name},${info.email},${info.phone}");
+
+      // 2. send code
+      AuthResult resp = await casauth.sendCode(email,
+          type: AccountType.email, method: "forget");
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      debugPrint("🔥 code: $code");
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      // 3. verify code
+      var (verified, cookie) = await casauth.verifyCode(email, code);
+      expect(verified, isTrue);
+      expect(cookie, isNotEmpty);
+
+      // 4. reset password
+      resp = await casauth.setPassword(info.name, code, password, cookie);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+
+      // 5. check changes
+      resp = await casauth.loginByAccount(email, password);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.token, isNotEmpty);
+
+      // 6. logout
+      await logout();
+    });
+  });
 }

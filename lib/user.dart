@@ -60,7 +60,7 @@ extension UserMethods on CASAuth {
       await logout();
     }
 
-    AuthResult resp = await post('/api/login', payload);
+    AuthResult resp = await post('/api/login', body: payload);
     if (resp.code != 200) {
       throw CASAuthError(
           ErrorLevel.error, "server failed, http code: ${resp.code}");
@@ -75,40 +75,6 @@ extension UserMethods on CASAuth {
       setToken(resp.jsonBody?['data']);
     }
 
-    return resp;
-  }
-
-  Future<AuthResult> sendCode(
-    String dest, {
-    String? checkUser = "",
-    String? method = "signup",
-    String? countryCode = "86",
-    String? captchaType = "none",
-    AccountType? type = AccountType.phone,
-  }) async {
-    if (type != AccountType.phone && type != AccountType.email) {
-      throw CASAuthError(ErrorLevel.error, "invalid account type");
-    }
-
-    if (isLogin) {
-      log("token is not empty, logout before login");
-      await logout();
-    }
-
-    String body =
-        "applicationId=admin/$app&method=$method&captchaType=$captchaType&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
-    Map<String, String> extHeader = {
-      "content-type": "application/x-www-form-urlencoded"
-    };
-
-    var resp = await post("/api/send-verification-code", body, extHeader);
-    if (resp.code != 200) {
-      throw CASAuthError(
-          ErrorLevel.error, "server failed, http code: ${resp.code}");
-    }
-    if (resp.status == "error") {
-      throw CASAuthError(ErrorLevel.error, resp.message!);
-    }
     return resp;
   }
 
@@ -142,7 +108,7 @@ extension UserMethods on CASAuth {
       'organization': organization,
     });
     debugPrint("🔥 registerByEmail payload: $payload");
-    AuthResult response = await post('/api/signup', payload);
+    AuthResult response = await post('/api/signup', body: payload);
 
     if (response.code != 200) {
       throw CASAuthError(
@@ -160,6 +126,27 @@ extension UserMethods on CASAuth {
     }
     return response;
   }
+
+  Future<UserEmailPhone> getEmailAndPhone(String account) async {
+    AuthResult response = await get(
+        "/api/get-email-and-phone?organization=dev&username=$account");
+
+    if (response.code != 200) {
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${response.code}");
+    }
+
+    if (response.status == "error" &&
+        response.message == "The user: $organization/$account doesn't exist") {
+      throw CASAuthError(ErrorLevel.error, "user not exist");
+    }
+
+    if (response.status == "error") {
+      throw CASAuthError(ErrorLevel.error, response.message!);
+    }
+    debugPrint("🔥 getEmailAndPhone by $account: ${response.message}");
+    return UserEmailPhone.fromJson(response.jsonBody?['data']);
+  }
 }
 
 enum AccountType { username, phone, email }
@@ -167,6 +154,18 @@ enum AccountType { username, phone, email }
 extension ParseToString on AccountType {
   String toShortString() {
     return name;
+  }
+}
+
+class UserEmailPhone {
+  String name = "";
+  String? email;
+  String? phone;
+  UserEmailPhone({this.name = "", this.email, this.phone});
+  UserEmailPhone.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    email = json['email'];
+    phone = json['phone'];
   }
 }
 

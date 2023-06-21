@@ -14,6 +14,7 @@ part './errors.dart';
 part './vault.dart';
 part './user.dart';
 part './http.dart';
+part './verification.dart';
 
 late CASAuth casauth;
 
