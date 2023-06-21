@@ -1,5 +1,5 @@
 name: casauth
-version: 2.1.1
+version: 2.1.2
 homepage: https://blog.kofj.net/projects/casauth-sdk.html
 repository: https://github.com/kofj/casauth-flutter-sdk
 description: CASAuth V2. A third Flutter client SDK for casdoor.
@@ -21,6 +21,7 @@ dependencies:
   stash: ^4.5.3
   stash_sqlite: ^4.6.2
   xid: ^1.0.12
+  http_cookie_store: ^0.0.1
 
 dev_dependencies:
   flutter_test:

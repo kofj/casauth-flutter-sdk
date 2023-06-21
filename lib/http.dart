@@ -6,7 +6,7 @@ class AuthResult {
   late String? message = "";
   late Map<String, dynamic>? jsonBody;
   late List<dynamic>? listBody;
-  late String? cookie;
+  late Cookie? cookie;
 
   AuthResult(int respCode,
       {String? respStatus, String? respMessage, Map<String, dynamic>? body}) {
@@ -19,7 +19,7 @@ class AuthResult {
 
 extension HttpReq on CASAuth {
   Future<AuthResult> get(String endpoint,
-      {Map<String, String>? extHeaders, String? cookie}) async {
+      {Map<String, String>? extHeaders, Cookie? cookie}) async {
     String url = server + endpoint;
 
     AuthResult resp = await request("get", url,
@@ -34,14 +34,14 @@ extension HttpReq on CASAuth {
   }
 
   Future<AuthResult> post(String endpoint,
-      {String? body, Map<String, String>? extHeaders, String? cookie}) async {
+      {String? body, Map<String, String>? extHeaders, Cookie? cookie}) async {
     String url = server + endpoint;
     return request("post", url,
         body: body, extHeaders: extHeaders, cookie: cookie);
   }
 
   Future<AuthResult> request(String method, String uri,
-      {String? body, Map<String, String>? extHeaders, String? cookie}) async {
+      {String? body, Map<String, String>? extHeaders, Cookie? cookie}) async {
     var url = Uri.parse(uri);
     Map<String, String> headers = {
       "x-app-id": appId,
@@ -59,8 +59,8 @@ extension HttpReq on CASAuth {
       headers["Authorization"] = "Bearer $token";
     }
 
-    if (cookie != null && cookie != "") {
-      headers["Cookie"] = cookie;
+    if (cookie != null) {
+      headers["Cookie"] = cookie.toCookieHeader;
     }
 
     method = method.toLowerCase();
@@ -98,8 +98,9 @@ extension HttpReq on CASAuth {
       result.message = data['msg'];
     }
 
-    if (resp.headers['set-cookie'] != null) {
-      result.cookie = resp.headers['set-cookie'];
+    var setCookieHeader = resp.headers['set-cookie'];
+    if (setCookieHeader != null && setCookieHeader != "") {
+      result.cookie = Cookie.fromSetCookieHeader(setCookieHeader);
     }
 
     return result;

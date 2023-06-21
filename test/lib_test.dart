@@ -64,7 +64,7 @@ void main() {
   logout() async {
     var resp = await casauth.logout();
     expect(resp.code, 200);
-    expect(casauth.token, isEmpty);
+    expect(casauth.isLogin, isFalse);
   }
 
   test("config fatal failed", () {
@@ -129,7 +129,7 @@ void main() {
       resp = await casauth.loginByAccount(id, id);
       expect(resp.code, 200);
       expect(resp.status, "ok");
-      expect(casauth.token, isNotEmpty);
+      expect(casauth.isLogin, isTrue);
       await logout();
     });
   });
@@ -139,7 +139,7 @@ void main() {
       var resp = await casauth.loginByAccount("me@kofj.net", "casauth");
       expect(resp.code, 200);
       expect(resp.status, "ok");
-      expect(casauth.token, isNotEmpty);
+      expect(casauth.isLogin, isTrue);
       await logout();
     });
 
@@ -166,7 +166,7 @@ void main() {
     await casauth.setToken("token");
     var resp = await casauth.logout();
     expect(resp.code, 200);
-    expect(casauth.token, isEmpty);
+    expect(casauth.isLogin, isFalse);
   });
 
   group("recovery password | ", () {
@@ -232,7 +232,7 @@ void main() {
       // 3. verify code
       var (verified, cookie) = await casauth.verifyCode(email, code);
       expect(verified, isTrue);
-      expect(cookie, isNotEmpty);
+      expect(cookie, isNotNull);
 
       // 4. reset password
       resp = await casauth.setPassword(info.name, code, password, cookie);
@@ -243,7 +243,7 @@ void main() {
       resp = await casauth.loginByAccount(email, password);
       expect(resp.code, 200);
       expect(resp.status, "ok");
-      expect(casauth.token, isNotEmpty);
+      expect(casauth.isLogin, isTrue);
 
       // 6. logout
       await logout();

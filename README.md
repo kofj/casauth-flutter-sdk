@@ -120,6 +120,8 @@ To recovery user's password, we must call API with 4 steps:
 3. verify code, get bool verified result and cookie.
 4. reset password with username, code, new password and cookie.
 
+🔥🔥🔥 IMPORTANT: `name` of `setPassword` MUST is username of casdoor, NOT email or phone.
+
 ```dart
 try {
   // 1. get emailAndPhone
