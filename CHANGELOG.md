@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.1.0
+date: 2023-06-21
+changes:
+- add methods for password recovery
+
 ## 2.0.0
 date: 2023-06-20
 changes:
