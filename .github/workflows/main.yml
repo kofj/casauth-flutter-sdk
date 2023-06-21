@@ -36,7 +36,7 @@ jobs:
         uses: jamesmortensen/cache-container-images-action@v1
         with:
           images: |
-            casbin/casdoor:v1.308.0
+            casbin/casdoor:v1.344.0
             mysql:8.0.31
             ghcr.io/cirruslabs/flutter:3.10.5
             mailhog/mailhog:latest

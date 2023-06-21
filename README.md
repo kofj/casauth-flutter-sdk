@@ -11,22 +11,22 @@
 
 CASAuth V2. A third Flutter client SDK for casdoor. Support follow platform:
 
-| platform | tested | example |
-| ---| ---| ---|
-| iOS | ✅ | - |
-| macOS | ✅ | [Download]() |
-| linux | [-] | - |
-| Windows | [-] | - |
+| platform | tested | example      |
+| -------- | ------ | ------------ |
+| iOS      | ✅      | -            |
+| macOS    | ✅      | [Download]() |
+| linux    | [-]    | -            |
+| Windows  | [-]    | -            |
 
 ## Getting Started
 You need install self's casdoor first. And I only test this SDK with a little version.
 
 | Version | Casdoor Min | Casdoor Max |
-|---|---|---|
-| v1.1.0 |  ✅ v1.97.0 | - |
-| v1.1.0 |  ✅ v1.123.0 | - |
-| v1.2.0 |  ✅ v1.223.0 | - |
-| v2.0.0 |  ✅ v1.308.0 | ✅ v1.344.0 |
+| ------- | ----------- | ----------- |
+| v1.1.0  | ✅ v1.97.0   | -           |
+| v1.1.0  | ✅ v1.123.0  | -           |
+| v1.2.0  | ✅ v1.223.0  | -           |
+| v2.0.0  | ✅ v1.308.0  | ✅ v1.344.0  |
 
 
 ## Quick Start
@@ -110,4 +110,34 @@ try {
   print("error level: ${err.level}, message: ${err.message}");
 }
 
+```
+
+### Recovery password
+To recovery user's password, we must call API with 4 steps:
+
+1. get email and phone info from server via username/email/phone.
+2. send verification code with account and account type.
+3. verify code, get bool verified result and cookie.
+4. reset password with username, code, new password and cookie.
+
+```dart
+try {
+  // 1. get emailAndPhone
+  var info = await casauth.getEmailAndPhone(email);
+
+  // 2. send code
+  await casauth.sendCode(email,
+      type: AccountType.email, method: "forget");
+
+  // 4. reset password
+  await casauth.setPassword(info.name, code, password, cookie);
+
+  // 3. verify code
+  var (verified, cookie) = await casauth.verifyCode(email, code);
+
+  // 4. reset password
+  await casauth.setPassword(info.name, code, password, cookie);
+} on CASAuthError catch (err) {
+  print("error level: ${err.level}, message: ${err.message}");
+}
 ```
