@@ -9,8 +9,6 @@ extension UserMethods on CASAuth {
 
   bool get isLogin => token != null && token != "";
 
-  // get user from cache
-  get currentUser => _user;
   Future<void> setUser(User? user) async {
     _user = user;
     await vault?.put("user", jsonEncode(user));
@@ -146,6 +144,31 @@ extension UserMethods on CASAuth {
     }
     debugPrint("🔥 getEmailAndPhone by $account: ${response.message}");
     return UserEmailPhone.fromJson(response.jsonBody?['data']);
+  }
+
+  Future<User> userInfo() async {
+    AuthResult response = await get("/api/get-account");
+    if (response.code != 200) {
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${response.code}");
+    }
+
+    if (response.status == "error") {
+      throw CASAuthError(ErrorLevel.error, response.message!);
+    }
+
+    var user = User.fromJson(response.jsonBody?['data']);
+    await setUser(user);
+    return user;
+  }
+
+  Future<User> get currentUser async {
+    // 1. get user from cache
+    if (_user != null) {
+      return _user!;
+    }
+    // 2. get user from server
+    return await userInfo();
   }
 }
 

@@ -103,5 +103,10 @@ class CASAuth {
     if (userJson != null) {
       _user = User.fromJson(jsonDecode(userJson));
     }
+
+    // 4. fetch user info from server.
+    if (_token != null && _token!.isNotEmpty) {
+      userInfo();
+    }
   }
 }
