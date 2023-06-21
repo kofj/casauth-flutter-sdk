@@ -1,5 +1,5 @@
 name: casauth
-version: 2.1.0
+version: 2.1.1
 homepage: https://blog.kofj.net/projects/casauth-sdk.html
 repository: https://github.com/kofj/casauth-flutter-sdk
 description: CASAuth V2. A third Flutter client SDK for casdoor.
@@ -17,7 +17,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  http: ^1.0.0
+  http: ^0.13.6
   stash: ^4.5.3
   stash_sqlite: ^4.6.2
   xid: ^1.0.12
