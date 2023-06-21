@@ -150,6 +150,16 @@ void main() {
       expect(casauth.token, isNotEmpty);
       await logout();
     });
+
+    test("current user", () async {
+      var resp = await casauth.loginByAccount("casauth", "casauth");
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      User user = await casauth.currentUser;
+      expect(user.name, "casauth");
+      expect(user.email, "me@kofj.net");
+      expect(user.displayName, "CASAuth 测试用户");
+    });
   });
 
   test("logout faild", () async {
