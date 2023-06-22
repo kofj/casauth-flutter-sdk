@@ -128,13 +128,13 @@ CREATE TABLE `casbin_rule` (
   `v3` varchar(100) NOT NULL DEFAULT '',
   `v4` varchar(100) NOT NULL DEFAULT '',
   `v5` varchar(100) NOT NULL DEFAULT '',
+  KEY `IDX_casbin_rule_v4` (`v4`),
+  KEY `IDX_casbin_rule_v5` (`v5`),
   KEY `IDX_casbin_rule_ptype` (`ptype`),
   KEY `IDX_casbin_rule_v0` (`v0`),
   KEY `IDX_casbin_rule_v1` (`v1`),
   KEY `IDX_casbin_rule_v2` (`v2`),
-  KEY `IDX_casbin_rule_v3` (`v3`),
-  KEY `IDX_casbin_rule_v4` (`v4`),
-  KEY `IDX_casbin_rule_v5` (`v5`)
+  KEY `IDX_casbin_rule_v3` (`v3`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -725,7 +725,7 @@ CREATE TABLE `record` (
   PRIMARY KEY (`id`),
   KEY `IDX_record_owner` (`owner`),
   KEY `IDX_record_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=700 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1098,7 +1098,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('built-in','admin','2023-06-19T06:55:43Z','','32cf3423-b9cd-40a1-8c0f-4abe96b18469','normal-user','123','','plain','Admin','','','https://cdn.casbin.org/img/casbin.svg','','admin@example.com',0,'12345678910','CN','','','[]','Example Inc.','','','','','','staff','','','','',2000,0,1,0,0,1,1,0,0,'app-built-in','','','127.0.0.1','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','null','','{}','null','null','',0,_binary 'null',NULL,NULL,NULL,NULL),('dev','casauth','2023-06-20T13:17:28+08:00','','6e4aea33-76e1-4da0-8f01-3e30337a705d','normal-user','5ecbfbaa5f80c80e8d69501dfb9ed0b77120d8e0ac7588e5d7000e4ebb9ae583','',NULL,'CASAuth 测试用户','','','https://cdn.casbin.org/img/casbin.svg','','me@kofj.net',0,'36333815104','US','','','[]','Example Inc.','','','','','','staff','','','','',2000,0,2,0,0,1,1,0,0,'app-built-in','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null',NULL,'','{}','null','null','',0,_binary 'null',NULL,NULL,NULL,NULL),('dev','recovery','2023-06-20T21:54:06+08:00','','eabd7082-cd9b-4e7d-879b-808812c0cd43','normal-user','3bece3e550439b4f226202cb71ea4b167767caa478e7215b54c2e118918f04c6','',NULL,'恢复密码测试用户','','','https://cdn.casbin.org/img/casbin.svg','','recovery@example.com',0,'99927680479','CN','','','[]','Example Inc.','','','','','','staff','','','','',0,0,2,0,0,1,1,0,0,'app-built-in','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null',NULL,'','{}','null','null','',0,_binary 'null',NULL,NULL,NULL,NULL);
+INSERT INTO `user` VALUES ('built-in','admin','2023-06-19T06:55:43Z','','32cf3423-b9cd-40a1-8c0f-4abe96b18469','normal-user','123','','plain','Admin','','','https://cdn.casbin.org/img/casbin.svg','','admin@example.com',0,'12345678910','CN','','','[]','Example Inc.','','','','','','staff','','','','',2000,0,1,0,0,1,1,0,0,'app-built-in','','','127.0.0.1','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','null','','{}','null','null','',0,_binary 'null',NULL,NULL,NULL,NULL),('dev','alice','2023-06-22T12:57:42+08:00','','b9c06ab9-b12f-40df-92c5-c3130a27541e','normal-user','123','','plain','アリス ·有栖·爱丽丝','','','https://cdn.casbin.org/img/casbin.svg','','a@a.a',0,'33595075406','US','','','[]','Example Inc.','','','','','','staff','','','','',2000,0,2,0,0,0,0,0,0,'app-built-in','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','null','','{}','null','null','',0,_binary 'null','','','','[]'),('dev','casauth','2023-06-20T13:17:28+08:00','','6e4aea33-76e1-4da0-8f01-3e30337a705d','normal-user','5ecbfbaa5f80c80e8d69501dfb9ed0b77120d8e0ac7588e5d7000e4ebb9ae583','',NULL,'CASAuth 测试用户','','','https://cdn.casbin.org/img/casbin.svg','','me@kofj.net',0,'36333815104','US','','','[]','Example Inc.','','','','','','staff','','','','',2000,0,2,0,0,0,0,0,0,'testapp','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null',NULL,'','{}','null','null','',0,_binary 'null',NULL,'','','[]'),('dev','kk','2023-06-22T12:52:17+08:00','','615016f1-9939-4a82-af3c-f84fd53022e7','normal-user','123','','plain','可可','','','https://cdn.casbin.org/img/casbin.svg','','k@k.k',0,'51174157499','CN','','','[]','Example Inc.','','','','','','','','','','',2000,0,2,0,0,0,0,0,0,'testapp','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null','null','','{}','null','null','',0,_binary 'null','','','','[]'),('dev','recovery','2023-06-20T21:54:06+08:00','','eabd7082-cd9b-4e7d-879b-808812c0cd43','normal-user','230ecf58ac0a7ccc2a696410aa67abe7eac4c14d0851d86662c9fcd7ed62e654','','salt','恢复密码测试用户','','','https://cdn.casbin.org/img/casbin.svg','','recovery@example.com',0,'99927680479','CN','','','[]','Example Inc.','','','','','','staff','','','','',0,0,2,0,0,0,0,0,0,'testapp','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',_binary 'null',NULL,'','{}','null','null','',0,_binary 'null',NULL,'','','[]');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1124,6 +1124,15 @@ CREATE TABLE `verification_record` (
   PRIMARY KEY (`owner`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `verification_record`
+--
+
+LOCK TABLES `verification_record` WRITE;
+/*!40000 ALTER TABLE `verification_record` DISABLE KEYS */;
+/*!40000 ALTER TABLE `verification_record` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `webhook`
@@ -1167,4 +1176,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-06-20  5:06:36
+-- Dump completed on 2023-06-22  5:10:54
