@@ -38,7 +38,7 @@ extension Verification on CASAuth {
     return resp;
   }
 
-  Future<(bool, String?)> verifyCode(String account, String code) async {
+  Future<(bool, Cookie?)> verifyCode(String account, String code) async {
     String body = jsonEncode({
       "application": app,
       "organization": organization,
@@ -61,9 +61,9 @@ extension Verification on CASAuth {
   }
 
   Future<AuthResult> setPassword(
-      String userName, String code, String newPassword, String? cookie) async {
+      String userName, String code, String password, Cookie? cookie) async {
     String body =
-        "userOwner=$organization&userName=$userName&code=$code&newPassword=$newPassword";
+        "userOwner=$organization&userName=$userName&code=$code&newPassword=$password";
     Map<String, String> extHeaders = {
       "content-type": "application/x-www-form-urlencoded"
     };
@@ -75,9 +75,11 @@ extension Verification on CASAuth {
           ErrorLevel.error, "server failed, http code: ${resp.code}");
     }
     if (resp.status == "error") {
-      debugPrint("🔥 setPassword error: ${resp.jsonBody}");
-      // throw CASAuthError(
-      //     ErrorLevel.error, resp.message ?? "none setPassword error message");
+      log("🔥 setPassword error: ${resp.jsonBody}");
+      String message = (resp.message == null || resp.message == "")
+          ? "unknown error message"
+          : resp.message!;
+      throw CASAuthError(ErrorLevel.error, message);
     }
     return resp;
   }

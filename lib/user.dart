@@ -14,8 +14,8 @@ extension UserMethods on CASAuth {
     await vault?.put("user", jsonEncode(user));
   }
 
-  Future logout() async {
-    if (token == null || token!.isEmpty) {
+  Future<AuthResult> logout() async {
+    if (token == null || token == "") {
       return AuthResult(200);
     }
     AuthResult resp = await get(
@@ -30,8 +30,7 @@ extension UserMethods on CASAuth {
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
       debugPrint("⚠️  success");
       _token = "";
-      await vault?.remove("user");
-      await vault?.remove("token");
+      await clearCache();
     }
 
     debugPrint("⚠️  logout ${resp.code}, body: ${resp.jsonBody}");
@@ -72,6 +71,9 @@ extension UserMethods on CASAuth {
     if (resp.code == 200 && resp.status == "ok") {
       setToken(resp.jsonBody?['data']);
     }
+
+    // update user info
+    await userInfo();
 
     return resp;
   }

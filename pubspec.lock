@@ -131,6 +131,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.6"
+  http_cookie_store:
+    dependency: "direct main"
+    description:
+      name: http_cookie_store
+      sha256: "5f7d423d0a856f1f449ec3bbaa17dd1cf6deaee0d45fc152afd37ba6ad8f3341"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   http_parser:
     dependency: transitive
     description:
@@ -195,6 +203,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.8.3"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   sky_engine:
     dependency: transitive
     description: flutter
