@@ -2,13 +2,15 @@ library casauth;
 
 import 'dart:io';
 import 'dart:convert';
-import 'dart:developer';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
 import 'package:stash/stash_api.dart';
 import 'package:stash_sqlite/stash_sqlite.dart';
 import 'package:http/http.dart' as http;
 import 'package:xid/xid.dart';
 import 'package:http_cookie_store/http_cookie_store.dart';
+export 'package:http_cookie_store/http_cookie_store.dart' show Cookie;
+export 'package:logger/logger.dart' show Level;
 
 part './config.dart';
 part './errors.dart';
@@ -27,6 +29,7 @@ Future<void> init(
   Vault? vault,
   String? userPrefix,
   String? redirectUri,
+  Level? logLevel = Level.info,
 }) async {
   casauth = CASAuth(
     appName,
@@ -36,6 +39,7 @@ Future<void> init(
     defaultVault: vault,
     userPrefix: userPrefix,
     redirectUri: redirectUri,
+    logLevel: logLevel,
   );
   await casauth.init();
 }
@@ -47,10 +51,12 @@ class CASAuth {
   String server = "";
   String organization = "";
   String version = "2.0.0";
+  Level? logLevel = Level.info;
   String redirectUri = "casauth";
   String randomUsernamePrefix = "mobile_";
   AppConfig? appConfig;
 
+  late Logger logger;
   String? _token;
   User? _user;
 
@@ -67,6 +73,7 @@ class CASAuth {
     Vault? defaultVault,
     String? userPrefix,
     String? redirectUri,
+    Level? logLevel = Level.info,
   }) {
     app = appName;
     appId = appID;
@@ -75,6 +82,14 @@ class CASAuth {
     this.redirectUri = redirectUri ?? this.redirectUri;
     randomUsernamePrefix = userPrefix ?? randomUsernamePrefix;
     vault = defaultVault;
+    logger = Logger(
+      filter: null,
+      printer: kDebugMode || kProfileMode
+          ? PrettyPrinter(printTime: true)
+          : PrefixPrinter(SimplePrinter(printTime: true)),
+      output: null,
+      level: logLevel,
+    );
   }
 
   Future<void> init() async {

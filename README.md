@@ -59,6 +59,7 @@ try {
 - `vault`: **Vault** of `Stash` package, CASAuth use it to cache token, user info etc. And we will default init sqlite database if not set `vault` parameter. You can initiate any `stash` Storage Implementations and create `vault` to customs storage for the SDK.
 - `userPrefix`: Random user name prefix. Default value is **mobile_**.
 - `redirectUri`: Address configured at Casdoor application config, the value must in the application's callback list. We use it to revoke/expired JWT token. Default value is **casauth**.
+- `logLevel`: Setting SDK logger print level. If app running at flutter's `kDebugMode` or `kProfileMode`, will print stack trace info to helps debug.
 
 ### Send code
 When the user register or recover password, must send verification code to the target email/mobile phone.

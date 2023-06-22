@@ -15,12 +15,16 @@ extension FetchAppConfig on CASAuth {
     };
 
     var endpoint = Uri.parse("$server/api/get-application?id=admin/$app");
-    debugPrint("fetch app config → $endpoint");
+    logger.d("fetch app config → $endpoint");
 
     var resp = await http.get(endpoint, headers: headers);
-    debugPrint("fetch app config ← ${resp.statusCode}");
+    logger.d("fetch app config ← ${resp.statusCode}");
     if (resp.statusCode != 200) {
-      log("init config failed: code=${resp.statusCode}/body=${resp.body.length} bytes");
+      logger.wtf({
+        "info": "init config failed",
+        "code": resp.statusCode,
+        "body.length": resp.body.length
+      });
       throw CASAuthError(ErrorLevel.fatal,
           "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
     }
