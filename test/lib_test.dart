@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:developer';
 import 'package:casauth/casauth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,21 +45,21 @@ void main() {
     }
     await db!.connect(timeoutMs: 1000);
 
-    debugPrint("---=== start setup ===---\n");
+    log("---=== start setup ===---\n");
 
-    debugPrint("---=== setup done ===---\n");
+    log("---=== setup done ===---\n");
   });
 
   tearDown(() async {
     await db?.execute("update verification_record set remote_addr=''").then(
-          (r) => debugPrint(
+          (r) => log(
             "clean verify record add affected rows: ${r.affectedRows}",
           ),
         );
 
     await db?.close();
 
-    debugPrint("----------- tear down -----------\n\n");
+    log("----------- tear down -----------\n\n");
   });
 
   logout() async {
@@ -79,10 +80,16 @@ void main() {
   });
 
   test('test config success', () async {
-    await init(appName, appId, server, orgnazationName);
+    await init(
+      appName,
+      appId,
+      server,
+      orgnazationName,
+      logLevel: Level.verbose,
+    );
 
     var cfg = casauth.appConfig;
-    debugPrint("🔥 appConfig: $cfg");
+    log("🔥 appConfig: $cfg");
 
     expect(cfg?.name, appName);
     expect(cfg?.owner, "admin");
@@ -211,7 +218,7 @@ void main() {
       var info = await casauth.getEmailAndPhone(email);
       expect(info.email, email);
       expect(info.name, username);
-      debugPrint("🔥 emailAndPhone: ${info.name},${info.email},${info.phone}");
+      log("🔥 emailAndPhone: ${info.name},${info.email},${info.phone}");
 
       // 2. send code
       AuthResult resp = await casauth.sendCode(email,
@@ -224,7 +231,7 @@ void main() {
         "select code from verification_record where receiver like '%$email' order by created_time desc limit 1",
       );
       String code = query.rows.first.colByName("code")!;
-      debugPrint("🔥 code: $code");
+      log("🔥 code: $code");
       expect(query.affectedRows, BigInt.zero);
       expect(query.rows.length, 1);
       expect(code, isNotEmpty);

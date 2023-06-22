@@ -22,6 +22,7 @@ dependencies:
   stash_sqlite: ^4.6.2
   xid: ^1.0.12
   http_cookie_store: ^0.0.1
+  logger: ^1.4.0
 
 dev_dependencies:
   flutter_test:

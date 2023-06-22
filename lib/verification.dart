@@ -14,7 +14,7 @@ extension Verification on CASAuth {
     }
 
     if (isLogin) {
-      log("token is not empty, logout before login");
+      logger.i("token is not empty, auto logout");
       await logout();
     }
 
@@ -23,7 +23,7 @@ extension Verification on CASAuth {
     Map<String, String> extHeaders = {
       "content-type": "application/x-www-form-urlencoded"
     };
-    debugPrint("🔥 sendCode body: $body");
+    logger.v("🔥 sendCode body: $body");
 
     var resp = await post("/api/send-verification-code",
         body: body, extHeaders: extHeaders);
@@ -67,7 +67,7 @@ extension Verification on CASAuth {
     Map<String, String> extHeaders = {
       "content-type": "application/x-www-form-urlencoded"
     };
-    debugPrint("🔥 setPassword body: $body");
+    logger.v({"info": "🔥 setPassword request body", "body": body});
     var resp = await post("/api/set-password",
         body: body, extHeaders: extHeaders, cookie: cookie);
     if (resp.code != 200) {
@@ -75,7 +75,8 @@ extension Verification on CASAuth {
           ErrorLevel.error, "server failed, http code: ${resp.code}");
     }
     if (resp.status == "error") {
-      log("🔥 setPassword error: ${resp.jsonBody}");
+      logger
+          .v({"info": "🔥 setPassword error", "resp.jsonBody": resp.jsonBody});
       String message = (resp.message == null || resp.message == "")
           ? "unknown error message"
           : resp.message!;

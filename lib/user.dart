@@ -15,25 +15,43 @@ extension UserMethods on CASAuth {
   }
 
   Future<AuthResult> logout() async {
-    if (token == null || token == "") {
+    if (token == null || token == "" || token == "null") {
       return AuthResult(200);
     }
     AuthResult resp = await get(
         '/api/logout?id_token_hint=$token&post_logout_redirect_uri=$redirectUri');
 
-    if (resp.code == 200 && resp.jsonBody?["status"] == "error") {
-      debugPrint("⚠️  server error: ${resp.jsonBody?["msg"]}, token: $token");
-      _token = "";
-      await clearCache();
-    }
-
     if (resp.code == 200 && resp.jsonBody?['data'] == "Affected") {
-      debugPrint("⚠️  success");
-      _token = "";
+      logger.v("⚠️  success");
       await clearCache();
     }
 
-    debugPrint("⚠️  logout ${resp.code}, body: ${resp.jsonBody}");
+    if (resp.status == "error" && resp.message == "Access token has expired") {
+      switch (resp.message) {
+        case "Access token has expired":
+          logger.d({
+            "info": "logout",
+            "code": resp.code,
+            "status": resp.status,
+            "jsonBody": resp.jsonBody,
+            "token": token
+          });
+          await clearCache();
+
+        default:
+          logger.v({
+            "info": "logout unknown error",
+            "code": resp.code,
+            "status": resp.status,
+            "jsonBody": resp.jsonBody,
+            "token": token
+          });
+          throw CASAuthError(ErrorLevel.error, resp.message!);
+      }
+    }
+
+    if (resp.status == "error") {}
+
     return resp;
   }
 
@@ -53,7 +71,7 @@ extension UserMethods on CASAuth {
     });
 
     if (isLogin) {
-      log("token is not empty, logout before login");
+      logger.w("token is not empty, auto logout");
       await logout();
     }
 
@@ -64,8 +82,7 @@ extension UserMethods on CASAuth {
     }
 
     if (resp.status == "error") {
-      debugPrint(
-          "🤬 login failed, response code ${resp.code}, body: ${resp.jsonBody}");
+      logger.d("🤬 login failed, code ${resp.code}, body: ${resp.jsonBody}");
       throw CASAuthError(ErrorLevel.error, resp.message!);
     }
     if (resp.code == 200 && resp.status == "ok") {
@@ -107,24 +124,21 @@ extension UserMethods on CASAuth {
       'application': app,
       'organization': organization,
     });
-    debugPrint("🔥 registerByEmail payload: $payload");
-    AuthResult response = await post('/api/signup', body: payload);
+    logger.v("🔥 registerByEmail payload: $payload");
+    AuthResult resp = await post('/api/signup', body: payload);
 
-    if (response.code != 200) {
+    if (resp.code != 200) {
+      logger.d("🤬 login failed, code ${resp.code}, body: ${resp.jsonBody}");
       throw CASAuthError(
-          ErrorLevel.error, "server failed, http code: ${response.code}");
+          ErrorLevel.error, "server failed, http code: ${resp.code}");
     }
 
-    if (response.status == "error") {
-      switch (response.message) {
-        // case "Code has not been sent yet!":
-        //   throw CASAuthError(ErrorLevel.warn, "email code required");
-
-        default:
-          throw CASAuthError(ErrorLevel.error, response.message!);
-      }
+    if (resp.status == "error") {
+      logger.d(
+          "🤬 signup failed, message ${resp.message}, body: ${resp.jsonBody}");
+      throw CASAuthError(ErrorLevel.error, resp.message!);
     }
-    return response;
+    return resp;
   }
 
   Future<UserEmailPhone> getEmailAndPhone(String account) async {
@@ -144,18 +158,22 @@ extension UserMethods on CASAuth {
     if (response.status == "error") {
       throw CASAuthError(ErrorLevel.error, response.message!);
     }
-    debugPrint("🔥 getEmailAndPhone by $account: ${response.message}");
+    logger.v("🔥 getEmailAndPhone by $account: ${response.message}");
     return UserEmailPhone.fromJson(response.jsonBody?['data']);
   }
 
   Future<User> userInfo() async {
     AuthResult response = await get("/api/get-account");
     if (response.code != 200) {
+      logger.d(
+          "🤬 get user info failed, code ${response.code}, body: ${response.jsonBody}");
       throw CASAuthError(
           ErrorLevel.error, "server failed, http code: ${response.code}");
     }
 
     if (response.status == "error") {
+      logger.d(
+          "🤬 get user info failed, message ${response.message}, body: ${response.jsonBody}");
       throw CASAuthError(ErrorLevel.error, response.message!);
     }
 
