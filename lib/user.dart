@@ -86,6 +86,7 @@ extension UserMethods on CASAuth {
       throw CASAuthError(ErrorLevel.error, resp.message!);
     }
     if (resp.code == 200 && resp.status == "ok") {
+      logger.v("🔥 login success, body: ${resp.jsonBody}");
       setToken(resp.jsonBody?['data']);
     }
 
@@ -143,7 +144,7 @@ extension UserMethods on CASAuth {
 
   Future<UserEmailPhone> getEmailAndPhone(String account) async {
     AuthResult response = await get(
-        "/api/get-email-and-phone?organization=dev&username=$account");
+        "/api/get-email-and-phone?organization=$organization&username=$account");
 
     if (response.code != 200) {
       throw CASAuthError(
