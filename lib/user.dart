@@ -191,6 +191,41 @@ extension UserMethods on CASAuth {
     // 2. get user from server
     return await userInfo();
   }
+
+  Future<AuthResult> softDeleteAccount() async {
+    _user?.isDeleted = true;
+
+    return updateAccount();
+  }
+
+  Future<AuthResult> cancelDeleteAccount() async {
+    _user?.isDeleted = false;
+
+    return updateAccount();
+  }
+
+  Future<AuthResult> updateAccount() async {
+    var body = jsonEncode(_user);
+
+    AuthResult response = await post(
+      "/api/update-user",
+      body: body.toString(),
+    );
+    if (response.code != 200) {
+      logger.d(
+          "🤬 update user failed, code ${response.code}, body: ${response.jsonBody}");
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${response.code}");
+    }
+
+    if (response.status == "error") {
+      logger.d(
+          "🤬 update user failed, message ${response.message}, body: ${response.jsonBody}");
+      throw CASAuthError(ErrorLevel.error, response.message!);
+    }
+    // await clearCache();
+    return response;
+  }
 }
 
 enum AccountType { username, phone, email }
@@ -243,6 +278,8 @@ class User {
   late String createdIp;
   late String lastSigninTime;
   late String lastSigninIp;
+  late String type;
+  late Map properties;
 
   late String createdTime;
   late String updatedTime;
@@ -277,6 +314,8 @@ class User {
     createdIp = json['createdIp'];
     lastSigninTime = json['lastSigninTime'];
     lastSigninIp = json['lastSigninIp'];
+    type = json['type'];
+    properties = json['properties'];
 
     createdTime = json['createdTime'];
     updatedTime = json['updatedTime'];
@@ -313,6 +352,8 @@ class User {
       'createdIp': createdIp,
       'lastSigninTime': lastSigninTime,
       'lastSigninIp': lastSigninIp,
+      'type': type,
+      'properties': properties,
       'createdTime': createdTime,
       'updatedTime': updatedTime,
     };

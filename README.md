@@ -27,6 +27,8 @@ You need install self's casdoor first. And I only test this SDK with a little ve
 | v1.1.0  | ✅ v1.123.0  | -           |
 | v1.2.0  | ✅ v1.223.0  | -           |
 | v2.0.0  | ✅ v1.308.0  | ✅ v1.344.0  |
+| v2.1.0  | ✅ v1.308.0  | ✅ v1.344.0  |
+| v2.2.0  | ✅ v1.308.0  | ✅ v1.344.0  |
 
 
 ## Quick Start
@@ -111,6 +113,28 @@ try {
   print("error level: ${err.level}, message: ${err.message}");
 }
 
+```
+
+### delete self
+Soft delete account by user self, this require organization allow user edit `Is deleted` config. The method not clean local token, you can cancelled it before logout with the authed token.
+```dart
+try {
+  AuthResult resp = casauth.softDeleteAccount();
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
+  print("error level: ${err.level}, message: ${err.message}");
+}
+```
+
+### cancel delete self
+Cancel soft delete account by user self, this require organization allow user edit `Is deleted` config.
+```dart
+try {
+  AuthResult resp = casauth.cancelDeleteAccount();
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
+  print("error level: ${err.level}, message: ${err.message}");
+}
 ```
 
 ### Recovery password
