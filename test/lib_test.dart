@@ -139,6 +139,41 @@ void main() {
       expect(casauth.isLogin, isTrue);
       await logout();
     });
+
+    test("verify self soft delete", () async {
+      var resp = await casauth.loginByAccount(email, id);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.isLogin, isTrue);
+
+      resp = await casauth.softDeleteAccount();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.isLogin, true);
+
+      IResultSet query = await db!.execute(
+        "select id,is_deleted from user where email = \"$email\" limit 1",
+      );
+      String isDeleted = query.rows.first.colByName("is_deleted")!;
+      expect(query.numOfRows, 1);
+      expect(isDeleted, "1");
+    });
+
+    test("verify self cancel soft delete", () async {
+      expect(casauth.isLogin, true);
+      expect(casauth.token, isNotEmpty);
+
+      var resp = await casauth.cancelDeleteAccount();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+
+      IResultSet query = await db!.execute(
+        "select id,is_deleted from user where email = \"$email\" limit 1",
+      );
+      String isDeleted = query.rows.first.colByName("is_deleted")!;
+      expect(query.numOfRows, 1);
+      expect(isDeleted, "0");
+    });
   });
 
   group("login", () {

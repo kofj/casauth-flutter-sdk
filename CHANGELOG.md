@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.2.0
+date: 2023-09-20
+changes:
+- add methods for soft delete account
+- add methods for cancel soft delete account
+
+
 ## 2.1.0
 date: 2023-06-21
 changes:
