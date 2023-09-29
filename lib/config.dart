@@ -17,22 +17,27 @@ extension FetchAppConfig on CASAuth {
     var endpoint = Uri.parse("$server/api/get-application?id=admin/$app");
     logger.d("fetch app config → $endpoint");
 
-    var resp = await http.get(endpoint, headers: headers);
-    logger.d("fetch app config ← ${resp.statusCode}");
-    if (resp.statusCode != 200) {
-      logger.wtf({
-        "info": "init config failed",
-        "code": resp.statusCode,
-        "body.length": resp.body.length
-      });
-      throw CASAuthError(ErrorLevel.fatal,
-          "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
+    try {
+      var resp = await http.get(endpoint, headers: headers);
+
+      logger.d("fetch app config ← ${resp.statusCode}");
+      if (resp.statusCode != 200) {
+        logger.wtf({
+          "info": "init config failed",
+          "code": resp.statusCode,
+          "body.length": resp.body.length
+        });
+        throw CASAuthError(ErrorLevel.fatal,
+            "Failed to retrieve application config. resp code=${resp.statusCode}/body=${resp.body}");
+      }
+      if (resp.body == "null" || resp.body.isEmpty) {
+        throw CASAuthError(ErrorLevel.fatal,
+            "Failed to retrieve application config. body is empty");
+      }
+      return configFromJson(resp.body);
+    } catch (err) {
+      throw CASAuthError(ErrorLevel.fatal, "fetch app config failed: $err");
     }
-    if (resp.body == "null" || resp.body.isEmpty) {
-      throw CASAuthError(ErrorLevel.fatal,
-          "Failed to retrieve application config. body is empty");
-    }
-    return configFromJson(resp.body);
   }
 }
 

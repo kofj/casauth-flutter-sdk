@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.2.1
+date: 2023-09-29
+changes:
+- fix: await fetch userinfo when init.
+- fix: catch error info when fetch app config.
+
 ## 2.2.0
 date: 2023-09-20
 changes:
