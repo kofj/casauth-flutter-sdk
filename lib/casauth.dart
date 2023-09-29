@@ -44,7 +44,7 @@ Future<void> init(
   await casauth.init();
 }
 
-class CASAuth {
+class CASAuth with ChangeNotifier {
   Vault? vault;
   String app = "";
   String appId = "";
@@ -122,7 +122,7 @@ class CASAuth {
 
     // 4. fetch user info from server.
     if (_token != null && _token!.isNotEmpty) {
-      userInfo();
+      await userInfo();
     }
   }
 }

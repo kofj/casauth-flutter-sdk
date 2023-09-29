@@ -16,6 +16,7 @@ extension UserMethods on CASAuth {
 
   Future<AuthResult> logout() async {
     if (token == null || token == "" || token == "null") {
+      await clearCache();
       return AuthResult(200);
     }
     AuthResult resp = await get(
