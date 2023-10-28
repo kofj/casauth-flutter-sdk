@@ -1,6 +1,5 @@
 library casauth;
 
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
@@ -20,6 +19,7 @@ part './http.dart';
 part './verification.dart';
 
 late CASAuth casauth;
+const dbPath = "casauth.db";
 
 Future<void> init(
   appName,
@@ -103,10 +103,7 @@ class CASAuth with ChangeNotifier {
 
     // 2. init vault store. used for store session, user info.
     if (vault == null) {
-      final dbPath = "${Directory.current.path}/Data/casauth.db";
-      final file = File(dbPath);
-
-      final store = await newSqliteLocalVaultStore(file: file);
+      final store = await newSqliteLocalVaultStore();
       vault = await store.vault(name: "casauth");
     }
     if (vault == null) {

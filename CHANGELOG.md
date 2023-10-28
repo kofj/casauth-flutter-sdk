@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.2.3
+date: 2023-10-28
+changes:
+- fix: default vault path.
+
 ## 2.2.1
 date: 2023-09-29
 changes:
