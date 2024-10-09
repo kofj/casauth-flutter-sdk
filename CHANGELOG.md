@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0
+date: 2024-10-09
+changes:
+- update: flutter sdk min version to 3.2.0
+- update: stash to 5.2.0 and stash_sqlite to 5.3.0
+
 ## 2.2.1
 date: 2023-09-29
 changes:
