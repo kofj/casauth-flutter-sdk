@@ -104,6 +104,14 @@ extension UserMethods on CASAuth {
     String password = '',
     String displayName = '',
   }) async {
+    // check is remote allow signup by email
+    if (!appConfig!.enableSignUp) {
+      throw CASAuthError(ErrorLevel.error, "signup is not allowed");
+    }
+    if (!appConfig!.hasSignupEmail) {
+      throw CASAuthError(ErrorLevel.error, "signup by email is not allowed");
+    }
+
     var requiredString = Xid().toString();
     if (username.isEmpty && appConfig!.requiredSignupUsername) {
       username = requiredString;
@@ -131,6 +139,63 @@ extension UserMethods on CASAuth {
 
     if (resp.code != 200) {
       logger.d("🤬 login failed, code ${resp.code}, body: ${resp.jsonBody}");
+      throw CASAuthError(
+          ErrorLevel.error, "server failed, http code: ${resp.code}");
+    }
+
+    if (resp.status == "error") {
+      logger.d(
+          "🤬 signup failed, message ${resp.message}, body: ${resp.jsonBody}");
+      throw CASAuthError(ErrorLevel.error, resp.message!);
+    }
+    return resp;
+  }
+
+  // register by phone
+  Future<AuthResult> registerByPhone(
+    String phone,
+    String code, {
+    String username = '',
+    String password = '',
+    String displayName = '',
+    String countryCode = "CN",
+  }) async {
+    // check is remote allow signup by phone
+    if (!appConfig!.enableSignUp) {
+      throw CASAuthError(ErrorLevel.error, "signup is not allowed");
+    }
+    if (!appConfig!.hasSignupPhone) {
+      throw CASAuthError(ErrorLevel.error, "signup by phone is not allowed");
+    }
+
+    var requiredString = Xid().toString();
+    if (username.isEmpty && appConfig!.requiredSignupUsername) {
+      username = requiredString;
+    }
+    if (appConfig!.requiredSignupDisplayName || displayName.isEmpty) {
+      displayName = requiredString;
+    }
+
+    if (password.isEmpty && appConfig!.requiredSignupPassword) {
+      password = requiredString;
+    }
+
+    var payload = jsonEncode({
+      'phone': phone,
+      'phoneCode': code, // verification code from sms, not country's code
+      'username': username,
+      'name': displayName,
+      'password': password,
+      'appId': appId,
+      'application': app,
+      'organization': organization,
+      'countryCode': countryCode,
+    });
+    logger.v("🔥 registerByPhone payload: $payload");
+    AuthResult resp = await post('/api/signup', body: payload);
+
+    if (resp.code != 200) {
+      logger.d("🤬 signup failed, code ${resp.code}, body: ${resp.jsonBody}");
       throw CASAuthError(
           ErrorLevel.error, "server failed, http code: ${resp.code}");
     }
