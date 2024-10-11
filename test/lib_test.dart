@@ -6,6 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'dart:developer';
+import 'dart:math' show Random;
 import 'package:casauth/casauth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -178,7 +179,8 @@ void main() {
 
   group("register.by.phone", () {
     var id = Xid().toString();
-    var phone = "18810007594";
+    final phoneSuffix = Random().nextInt(9999).toString().padLeft(4, "0");
+    var phone = "1881000$phoneSuffix";
     // by phone
     test("by phone", () async {
       AuthResult resp = await casauth.sendCode(phone, type: AccountType.phone);
