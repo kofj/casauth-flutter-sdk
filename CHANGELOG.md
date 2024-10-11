@@ -1,4 +1,8 @@
 # Change Log
+## 2.4.0
+date: 2024-10-11
+changes:
+- add: new method `registerByPhone`
 
 ## 2.3.0
 date: 2024-10-09

@@ -23,12 +23,10 @@ You need install self's casdoor first. And I only test this SDK with a little ve
 
 | Version | Casdoor Min | Casdoor Max |
 | ------- | ----------- | ----------- |
-| v1.1.0  | ✅ v1.97.0   | -           |
-| v1.1.0  | ✅ v1.123.0  | -           |
-| v1.2.0  | ✅ v1.223.0  | -           |
 | v2.0.0  | ✅ v1.308.0  | ✅ v1.344.0  |
 | v2.1.0  | ✅ v1.308.0  | ✅ v1.344.0  |
 | v2.2.0  | ✅ v1.308.0  | ✅ v1.344.0  |
+| v2.3.0  | ✅ v1.308.0  | ✅ v1.344.0  |
 
 
 ## Quick Start
@@ -70,6 +68,19 @@ try {
   AuthResult resp = await casauth.sendCode(email, type: AccountType.email);
 } catch (e) {
   debugPrint("send code failed");
+  print("error level: ${err.level}, message: ${err.message}");
+}
+```
+
+### Signup/Register by phone
+The method `registerByPhone` default support 🇨🇳 Chinese mobile phone number via paramter `countryCode=CN`.
+
+```dart
+try {
+  AuthResult resp = await casauth.registerByPhone(phone, code, username: id, password: id);
+  print("expect true: ${resp.code == 200}, and true: ${resp.status == "ok"}");
+} on CASAuthError catch (err) {
+  debugPrint("register user failed");
   print("error level: ${err.level}, message: ${err.message}");
 }
 ```
