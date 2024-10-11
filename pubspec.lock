@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: buffer
-      sha256: "94f60815065a8f0fd4f05be51faf86cf86519327e039d5c2aac72e1d1cc1dad4"
+      sha256: "389da2ec2c16283c8787e0adaede82b1842102f8c8aae2f49003a766c5c6b3d1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.3"
   characters:
     dependency: transitive
     description:
@@ -61,18 +61,18 @@ packages:
     dependency: transitive
     description:
       name: crypto
-      sha256: ff625774173754681d66daaf4a448684fb04b78f902da9cb3d308c19cc5e8bab
+      sha256: ec30d999af904f33454ba22ed9a86162b35e52b44ac4807d1d93c288041d7d27
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.0.5"
   cupertino_icons:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: d57953e10f9f8327ce64a508a355f0b1ec902193f66288e8cb5070e7c47eeb2d
+      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.6"
+    version: "1.0.8"
   drift:
     dependency: transitive
     description:
@@ -101,10 +101,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "7bf0adc28a23d395f19f3f1eb21dd7cfd1dd9f8e1c50051c069122e6853bc878"
+      sha256: "16ed7b077ef01ad6170a3d0c57caa4a112a38d7a2ed5602e0aca9ca6f3d98da6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.3"
   fixnum:
     dependency: transitive
     description:
@@ -239,10 +239,10 @@ packages:
     dependency: transitive
     description:
       name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -380,10 +380,10 @@ packages:
     dependency: "direct main"
     description:
       name: xid
-      sha256: "7ade0e857bac6f17337a41e37e399c13291c0b721634d7f5637d21c1ae6f3ecd"
+      sha256: "58b61c7c1234810afa500cde7556d7c407ce72154e0d5a8a5618690f03848dbd"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.12"
+    version: "1.2.1"
 sdks:
   dart: ">=3.4.0 <4.0.0"
   flutter: ">=3.18.0-18.0.pre.54"
