@@ -97,7 +97,7 @@ void main() {
     expect(cfg?.organization, orgnazationName);
   });
 
-  group("register", () {
+  group("register.by.email", () {
     var id = Xid().toString();
     var email = "$id@kofj.net";
     test("by email", () async {
@@ -169,6 +169,81 @@ void main() {
 
       IResultSet query = await db!.execute(
         "select id,is_deleted from user where email = \"$email\" limit 1",
+      );
+      String isDeleted = query.rows.first.colByName("is_deleted")!;
+      expect(query.numOfRows, 1);
+      expect(isDeleted, "0");
+    });
+  });
+
+  group("register.by.phone", () {
+    var id = Xid().toString();
+    var phone = "18810007594";
+    // by phone
+    test("by phone", () async {
+      AuthResult resp = await casauth.sendCode(phone, type: AccountType.phone);
+      expect(resp.code, 200,
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      expect(resp.status, "ok",
+          reason: "resp: ${resp.code}/${resp.status}/${resp.message}");
+      IResultSet query = await db!.execute(
+        "select code from verification_record where receiver like '%$phone' order by created_time desc limit 1",
+      );
+      String code = query.rows.first.colByName("code")!;
+      expect(query.affectedRows, BigInt.zero);
+      expect(query.rows.length, 1);
+      expect(code, isNotEmpty);
+
+      var resp2 = await casauth.registerByPhone(
+        phone,
+        code,
+        username: id,
+        password: id,
+      );
+
+      expect(resp2.code, 200);
+    });
+
+    // verify phone register
+    test("verify phone register", () async {
+      var resp = await casauth.loginByAccount(phone, id);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.isLogin, isTrue);
+      await logout();
+    });
+
+    // verfiy self soft delete
+    test("verify self soft delete", () async {
+      var resp = await casauth.loginByAccount(phone, id);
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.isLogin, isTrue);
+
+      resp = await casauth.softDeleteAccount();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+      expect(casauth.isLogin, true);
+
+      IResultSet query = await db!.execute(
+        "select id,is_deleted from user where phone = \"$phone\" limit 1",
+      );
+      String isDeleted = query.rows.first.colByName("is_deleted")!;
+      expect(query.numOfRows, 1);
+      expect(isDeleted, "1");
+    });
+
+    // verify self cancel soft delete
+    test("verify self cancel soft delete", () async {
+      expect(casauth.isLogin, true);
+      expect(casauth.token, isNotEmpty);
+
+      var resp = await casauth.cancelDeleteAccount();
+      expect(resp.code, 200);
+      expect(resp.status, "ok");
+
+      IResultSet query = await db!.execute(
+        "select id,is_deleted from user where phone = \"$phone\" limit 1",
       );
       String isDeleted = query.rows.first.colByName("is_deleted")!;
       expect(query.numOfRows, 1);

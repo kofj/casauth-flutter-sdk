@@ -5,7 +5,7 @@ extension Verification on CASAuth {
     String dest, {
     String? checkUser = "",
     String? method = "signup",
-    String? countryCode = "86",
+    String countryCode = "CN",
     String? captchaType = "none",
     AccountType? type = AccountType.phone,
   }) async {
@@ -18,8 +18,17 @@ extension Verification on CASAuth {
       await logout();
     }
 
+    if (type == AccountType.phone) {
+      final cdc = CountryDialCode.fromCountryCode(countryCode);
+
+      logger.v(
+          "🔥🔥🔥 sendCode: $dest, $cdc, ${cdc.code}, ${cdc.dialCode}, ${cdc.flagURI}, ${cdc.name}");
+
+      dest = "${cdc.dialCode}$dest";
+    }
+
     String body =
-        "applicationId=admin/$app&method=$method&captchaType=$captchaType&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser";
+        "applicationId=admin/$app&method=$method&captchaType=$captchaType&dest=$dest&type=${type?.toShortString()}&checkUser=$checkUser&countryCode=$countryCode";
     Map<String, String> extHeaders = {
       "content-type": "application/x-www-form-urlencoded"
     };
